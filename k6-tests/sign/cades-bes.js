@@ -1,37 +1,27 @@
-import http from 'k6/http';
+import { config } from '../config.js';
 
-import { check, group, sleep, fail } from 'k6';
-import encoding from 'k6/encoding';
+import http from 'k6/http';
+import { check } from 'k6';
 import { FormData } from 'https://jslib.k6.io/formdata/0.0.2/index.js';
 
 export const options = {
-
-  vus: 10,
-
-  duration: '10s',
-
+  vus: config.vus,
+  duration: config.duration,
   insecureSkipTLSVerify: true,
-
   thresholds: {
-
-    http_req_duration: ['p(99)<60000'], // 99% of requests must complete below 1min
-
+    http_req_duration: ['p(99)<3000'], // 99% of requests must complete below 3s
   },
-
 };
 
-const BASE_URL = 'http://localhost:8080';
-
-const ENDPOINT = '/sign';
+const BASE_URL = config.host;
+const ENDPOINT = config.endpoint.sign;
 
 export default () => {
   const fd = new FormData();
 
-  fd.append('type', 'xlt1');
-  fd.append('tsp', 'http://testca2012.cryptopro.ru/tsp/tsp.srf');
-
+  fd.append('type', 'bes');
+  fd.append('tsp', '');
   fd.append('detached', 'true');
-
   fd.append('data', { data: 'data to sign', filename: 'data.bin', content_type: 'application/octet-stream' });
 
   const headers = {'Content-Type': 'multipart/form-data; boundary=' + fd.boundary}
