@@ -16,7 +16,6 @@ import java.security.cert.CertificateException;
 public class StoreConfig {
     private KeyStore keyStore;
 
-
     @Value("${app.cp.keystore}")
     private String keyStoreName;
     @Value("${app.cp.alias}")

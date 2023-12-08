@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import ru.cryptopro.support.spring.example.utils.JavaVersionHelper;
 
 import java.security.Security;
+import java.security.Provider;
 
 @SpringBootApplication
 public class ExampleApplication {
@@ -19,7 +20,7 @@ public class ExampleApplication {
         int javaMajorVersion = JavaVersionHelper.getVersion();
         if (javaMajorVersion >= 10) {
             try {
-                Security.addProvider(new ru.CryptoPro.JCSP.JCSP());
+                Security.addProvider( (Provider) Class.forName("ru.CryptoPro.JCSP.JCSP").newInstance());
             } catch (Exception e) {
                 e.printStackTrace();
             }
