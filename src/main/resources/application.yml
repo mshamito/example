@@ -1,16 +1,14 @@
 app:
   cp:
-    keystore: HDIMAGE
+    keystore: HDImageStore
     alias: test2012
     pin: ""
   controller:
-    encrypt:
-      "/encr"
-    sign:
-      "/sign"
+    encrypt: "/encr"
+    sign: "/sign"
+    verify: "/verify"
 server:
-  port:
-    8080
+  port: 8080
 spring:
   servlet:
     multipart:

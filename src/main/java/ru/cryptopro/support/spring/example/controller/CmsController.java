@@ -6,11 +6,9 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.cryptopro.support.spring.example.dto.CmsDto;
-import ru.cryptopro.support.spring.example.dto.DataDto;
-import ru.cryptopro.support.spring.example.dto.SignatureParams;
+import ru.cryptopro.support.spring.example.dto.*;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
-import ru.cryptopro.support.spring.example.expection.DataException;
+import ru.cryptopro.support.spring.example.expection.ProvidedDataException;
 import ru.cryptopro.support.spring.example.service.SignService;
 
 import java.io.IOException;
@@ -33,7 +31,7 @@ public class CmsController {
             @RequestParam(required = false, value = "cert") List<MultipartFile> certs
     ) throws IOException {
         if (data.isEmpty())
-            throw new DataException("Provided data is empty");
+            throw new ProvidedDataException("Provided data is empty");
         CmsDto response = signService.encrypt(new DataDto(data.getBytes()), certs);
         if (response.isEmpty())
             throw new CryptographicException("encrypt failed");
@@ -42,13 +40,13 @@ public class CmsController {
 
     @PostMapping("${app.controller.sign}")
     public CmsDto sign(
-            @RequestParam(value = "data") MultipartFile data,
+            @RequestParam MultipartFile data,
             @RequestParam(required = false) boolean detached,
             @RequestParam(required = false) @Schema(defaultValue = "http://testca2012.cryptopro.ru/tsp/tsp.srf") String tsp,
             @RequestParam(required = false) @Schema(defaultValue = "bes") String type
     ) throws IOException {
         if (data.isEmpty())
-            throw new DataException("Provided data is empty");
+            throw new ProvidedDataException("Provided data is empty");
         SignatureParams.SignatureParamsBuilder builder = SignatureParams.builder();
         builder.detached(detached);
         if (Strings.isNotBlank(tsp))
@@ -60,5 +58,13 @@ public class CmsController {
         if (response.isEmpty())
             throw new CryptographicException("sign failed");
         return response;
+    }
+
+    @PostMapping("${app.controller.verify}")
+    public List<VerifyResult> verify(
+            @RequestParam MultipartFile sign,
+            @RequestParam(required = false) MultipartFile data
+    ) throws IOException {
+        return signService.verify(new VerifyRequest(sign.getBytes(), data == null ? null : data.getBytes()));
     }
 }
