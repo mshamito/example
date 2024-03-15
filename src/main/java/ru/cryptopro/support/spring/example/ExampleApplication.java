@@ -2,13 +2,15 @@ package ru.cryptopro.support.spring.example;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import ru.cryptopro.support.spring.example.utils.JavaVersionHelper;
 
 import java.security.Security;
 import java.security.Provider;
 
 @SpringBootApplication
-public class ExampleApplication {
+public class ExampleApplication extends SpringBootServletInitializer {
 
     static {
         System.setProperty("com.ibm.security.enableCRLDP", "true"); //crl online
@@ -20,7 +22,7 @@ public class ExampleApplication {
         int javaMajorVersion = JavaVersionHelper.getVersion();
         if (javaMajorVersion >= 10) {
             try {
-                Security.addProvider( (Provider) Class.forName("ru.CryptoPro.JCSP.JCSP").newInstance());
+                addProvider("ru.CryptoPro.JCSP.JCSP");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -30,8 +32,17 @@ public class ExampleApplication {
         }
     }
 
+    static void addProvider(String fullName) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Security.addProvider((Provider) Class.forName(fullName).newInstance());
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(ExampleApplication.class, args);
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(ExampleApplication.class);
     }
 
 }
