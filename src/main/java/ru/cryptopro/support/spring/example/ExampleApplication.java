@@ -28,6 +28,7 @@ public class ExampleApplication extends SpringBootServletInitializer {
             } else {
                 addProvider("ru.CryptoPro.JCP.JCP");
                 addProvider("ru.CryptoPro.Crypto.CryptoProvider");
+                addProvider("ru.CryptoPro.ssl.Provider");
             }
             addProvider("ru.CryptoPro.reprov.RevCheck");
         }
