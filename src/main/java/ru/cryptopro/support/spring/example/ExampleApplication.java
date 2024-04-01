@@ -21,19 +21,27 @@ public class ExampleApplication extends SpringBootServletInitializer {
 
         int javaMajorVersion = JavaVersionHelper.getVersion();
         if (javaMajorVersion >= 10) {
-            try {
-                addProvider("ru.CryptoPro.JCSP.JCSP");
-            } catch (Exception e) {
-                e.printStackTrace();
+            boolean isJCSPExists = addProvider("ru.CryptoPro.JCSP.JCSP");
+            if (isJCSPExists) {
+                if (!addProvider("ru.CryptoPro.sspiSSL.SSPISSL"))
+                    addProvider("ru.CryptoPro.ssl.Provider");
+            } else {
+                addProvider("ru.CryptoPro.JCP.JCP");
+                addProvider("ru.CryptoPro.Crypto.CryptoProvider");
             }
-            Security.addProvider(new ru.CryptoPro.JCP.JCP());
-            Security.addProvider(new ru.CryptoPro.reprov.RevCheck());
-            Security.addProvider(new ru.CryptoPro.Crypto.CryptoProvider());
+            addProvider("ru.CryptoPro.reprov.RevCheck");
         }
     }
 
-    static void addProvider(String fullName) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        Security.addProvider((Provider) Class.forName(fullName).newInstance());
+    static boolean addProvider(String fullName) {
+        try {
+            Security.addProvider((Provider) Class.forName(fullName).newInstance());
+            return true;
+        } catch (InstantiationException | ClassNotFoundException | IllegalAccessException e) {
+            System.out.println("Failed add provider: " + fullName);
+            System.out.println("error: " + e.getMessage());
+            return false;
+        }
     }
 
     public static void main(String[] args) {
