@@ -1,7 +1,7 @@
 package ru.cryptopro.support.spring.example.config;
 
 import lombok.SneakyThrows;
-import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry;
@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Log
+@Log4j2
 @Configuration
 public class CertConfig {
     private final StoreConfig storeConfig;

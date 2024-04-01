@@ -1,7 +1,7 @@
 package ru.cryptopro.support.spring.example.controller;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
-@Log
+@Log4j2
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 public class CmsController {
     private final SignService signService;
