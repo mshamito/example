@@ -3,7 +3,6 @@ package ru.cryptopro.support.spring.example.config;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
-import ru.CryptoPro.ssl.Provider;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
@@ -26,7 +25,7 @@ public class SSLContextConfig {
 
     @SneakyThrows
     public SSLContext getInstance(boolean mTLS) {
-        SSLContext context = SSLContext.getInstance(Provider.ALGORITHM_12);
+        SSLContext context = SSLContext.getInstance("GostTLSv1.2");
         context.init(mTLS? keyManagers : null, trustManagers, null);
         return context;
     }

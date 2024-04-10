@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.CryptoPro.JCP.JCP;
-import ru.CryptoPro.ssl.Provider;
 
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -38,7 +37,7 @@ public class TrustManagerConfig {
 
         log.info("trusted certificate size is {} for remote web tls", certs.size());
 
-        TrustManagerFactory factory = TrustManagerFactory.getInstance(Provider.TRUSTMANGER_ALG);
+        TrustManagerFactory factory = TrustManagerFactory.getInstance("GostX509");
         factory.init(keyStore);
         return factory.getTrustManagers();
     }

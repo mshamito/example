@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.CryptoPro.JCP.JCP;
 import ru.CryptoPro.ssl.JavaTLSCertPathManagerParameters;
-import ru.CryptoPro.ssl.Provider;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -38,7 +37,7 @@ public class KeyManagerConfig {
     @SneakyThrows
     public KeyManager[] getKeyManagers() {
 
-        KeyManagerFactory factory = KeyManagerFactory.getInstance(Provider.KEYMANGER_ALG);
+        KeyManagerFactory factory = KeyManagerFactory.getInstance("GostX509");
         if (storeConfig.isChainNeeded()) {
             log.warn("Need certificate chain for your alias. using local certificates");
             KeyStore trustStore = KeyStore.getInstance(JCP.CERT_STORE_NAME);
