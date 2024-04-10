@@ -42,7 +42,5 @@ public class ClientTlsService {
             content += current;
         }
         return content;
-//        System.out.println(connection.getContent());
-//        return "Status Code: " + connection.getResponseCode();
     }
 }
