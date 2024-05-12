@@ -8,10 +8,6 @@ plugins {
 group = 'ru.cryptopro.support.spring'
 version = '0.0.1-SNAPSHOT'
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-}
-
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -27,6 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-tomcat'
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

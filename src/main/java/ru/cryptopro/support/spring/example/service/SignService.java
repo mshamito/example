@@ -116,8 +116,8 @@ public class SignService {
                         signer.getSignatureType()
                 ));
                 X509Certificate cert = signer.getSignerCertificate();
-                result.setSubjectDN(cert.getSubjectDN());
-                result.setIssuerDN(cert.getIssuerDN());
+                result.setSubjectDN(cert.getSubjectX500Principal());
+                result.setIssuerDN(cert.getIssuerX500Principal());
                 result.setNotBefore(cert.getNotBefore());
                 result.setNotAfter(cert.getNotAfter());
 
