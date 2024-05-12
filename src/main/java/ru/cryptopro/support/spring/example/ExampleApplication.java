@@ -6,6 +6,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import ru.cryptopro.support.spring.example.utils.JavaVersionHelper;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.Security;
 import java.security.Provider;
 
@@ -36,9 +37,9 @@ public class ExampleApplication extends SpringBootServletInitializer {
 
     static boolean addProvider(String fullName) {
         try {
-            Security.addProvider((Provider) Class.forName(fullName).newInstance());
+            Security.addProvider((Provider) Class.forName(fullName).getConstructor().newInstance());
             return true;
-        } catch (InstantiationException | ClassNotFoundException | IllegalAccessException e) {
+        } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             System.out.println("Failed add provider: " + fullName);
             System.out.println("error: " + e.getMessage());
             return false;

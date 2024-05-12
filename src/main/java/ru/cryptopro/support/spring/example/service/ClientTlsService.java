@@ -10,6 +10,7 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 
 @Log4j2
@@ -23,7 +24,7 @@ public class ClientTlsService {
 
     @SneakyThrows
     public String connect(ClienTlsDto clienTlsDto) {
-        URL url = new URL(clienTlsDto.getUrl());
+        URL url = URI.create(clienTlsDto.getUrl()).toURL();
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
         connection.setSSLSocketFactory(contextConfig.getInstance(clienTlsDto.isMTLS()).getSocketFactory());
         connection.setDoOutput(true);
