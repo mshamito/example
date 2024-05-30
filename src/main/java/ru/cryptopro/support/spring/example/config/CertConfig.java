@@ -10,12 +10,11 @@ import ru.CryptoPro.JCP.params.JCPProtectionParameter;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import java.io.File;
+import java.io.FileInputStream;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -62,15 +61,15 @@ public class CertConfig {
     @SneakyThrows
     @Bean("certsFromCACerts")
     public Set<X509Certificate> getCertsFromCacerts() {
-        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trustManagerFactory.init((KeyStore) null);
-
-        List<TrustManager> trustManagers = Arrays.asList(trustManagerFactory.getTrustManagers());
-        return trustManagers.stream()
-                .filter(X509TrustManager.class::isInstance)
-                .map(X509TrustManager.class::cast)
-                .map(trustManager -> Arrays.asList(trustManager.getAcceptedIssuers()))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        Set<X509Certificate> result = new HashSet<>();
+        KeyStore cacerts = KeyStore.getInstance("JKS");
+        String cacertsPath = System.getProperty("java.home") + "/lib/security/cacerts".replace("/", File.separator);
+        cacerts.load(new FileInputStream(cacertsPath), "changeit".toCharArray());
+        Enumeration<String> aliases = cacerts.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            result.add((X509Certificate) cacerts.getCertificate(alias));
+        }
+        return result;
     }
 }
