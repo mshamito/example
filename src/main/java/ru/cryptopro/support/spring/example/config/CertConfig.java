@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -60,7 +61,7 @@ public class CertConfig {
 
     @SneakyThrows
     @Bean("certsFromCACerts")
-    public List<X509Certificate> getCertsFromCacerts() {
+    public Set<X509Certificate> getCertsFromCacerts() {
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustManagerFactory.init((KeyStore) null);
 
@@ -70,6 +71,6 @@ public class CertConfig {
                 .map(X509TrustManager.class::cast)
                 .map(trustManager -> Arrays.asList(trustManager.getAcceptedIssuers()))
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 }

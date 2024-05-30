@@ -11,17 +11,17 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Log4j2
 @Configuration
 public class TrustManagerConfig {
-    private final List<X509Certificate> certs;
+    private final Set<X509Certificate> certs;
 
     public TrustManagerConfig(
             @Qualifier("certsFromCACerts")
-            List<X509Certificate> certs
+            Set<X509Certificate> certs
     ) {
         this.certs = certs;
     }

@@ -8,6 +8,7 @@ app:
     sign: "/sign"
     verify: "/verify"
     tls: "/tls"
+    cert: "/cert"
 server:
   port: 8080
 spring:
