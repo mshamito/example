@@ -2,13 +2,11 @@ package ru.cryptopro.support.spring.example.service;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.CryptoPro.AdES.Options;
-import ru.CryptoPro.CAdES.CAdESSignature;
-import ru.CryptoPro.CAdES.CAdESSigner;
-import ru.CryptoPro.CAdES.CAdESType;
-import ru.CryptoPro.CAdES.EnvelopedSignature;
+import ru.CryptoPro.CAdES.*;
 import ru.CryptoPro.CAdES.exception.CAdESException;
 import ru.CryptoPro.JCP.tools.AlgorithmUtility;
 import ru.cryptopro.support.spring.example.dto.*;
@@ -42,9 +40,9 @@ public class SignService {
         this.privateKey = privateKey;
     }
 
-    public CmsDto encrypt(DataDto data, List<MultipartFile> certs) {
+    public ResponseEntity<byte[]> encrypt(DataDto data, List<MultipartFile> certs) {
         try {
-            EnvelopedSignature envelopedSignature = new EnvelopedSignature();
+            EnvelopedSignature envelopedSignature = new EnvelopedSignature(EncryptionKeyAlgorithm.ekaKuznechik);
             if (certs.isEmpty()) {
                 envelopedSignature.addKeyAgreeRecipient(certificate);
             } else {
@@ -57,7 +55,18 @@ public class SignService {
             envelopedSignature.open(cms);
             envelopedSignature.update(data.getData());
             envelopedSignature.close();
-            return new CmsDto(cms.toByteArray());
+            return ResponseEntity.ok().body(cms.toByteArray());
+        } catch (Exception e) {
+            throw new CryptographicException(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<byte[]> decrypt(MultipartFile encryptedCms) {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            EnvelopedSignature envelopedSignature = new EnvelopedSignature(encryptedCms.getInputStream());
+            envelopedSignature.decrypt(certificate, privateKey, byteArrayOutputStream);
+            return ResponseEntity.ok().body(byteArrayOutputStream.toByteArray());
         } catch (Exception e) {
             throw new CryptographicException(e.getMessage());
         }

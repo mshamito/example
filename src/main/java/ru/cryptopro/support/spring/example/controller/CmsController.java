@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.dto.*;
@@ -25,17 +26,23 @@ public class CmsController {
         this.signService = signService;
     }
 
-    @PostMapping("${app.controller.encrypt}")
-    public CmsDto encrypt(
+    @PostMapping(value = "${app.controller.encrypt}", produces =MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<byte[]> encrypt(
             @RequestParam(value = "data") MultipartFile data,
             @RequestParam(required = false, value = "cert") List<MultipartFile> certs
     ) throws IOException {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
-        CmsDto response = signService.encrypt(new DataDto(data.getBytes()), certs);
-        if (response.isEmpty())
-            throw new CryptographicException("encrypt failed");
-        return response;
+        return signService.encrypt(new DataDto(data.getBytes()), certs);
+    }
+
+    @PostMapping(value = "${app.controller.decrypt}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<byte[]> decrypt(
+            @RequestParam(value = "cms") MultipartFile encryptedCms
+    ) throws IOException {
+        if (encryptedCms.isEmpty())
+            throw new ProvidedDataException("Provided data is empty");
+        return signService.decrypt(encryptedCms);
     }
 
     @PostMapping("${app.controller.sign}")
