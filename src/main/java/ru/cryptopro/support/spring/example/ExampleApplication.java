@@ -35,13 +35,12 @@ public class ExampleApplication extends SpringBootServletInitializer {
         }
     }
 
-    static boolean addProvider(String fullName) {
+    private static boolean addProvider(String fullName) {
         try {
             Security.addProvider((Provider) Class.forName(fullName).getConstructor().newInstance());
             return true;
         } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             System.out.println("Failed add provider: " + fullName);
-            System.out.println("error: " + e.getMessage());
             return false;
         }
     }

@@ -1,6 +1,11 @@
 app:
   cp:
+#    for JCSP
     keystore: HDIMAGE
+
+#    for JCP
+#    keystore: HDImageStore
+
     alias: test2012
     pin: ""
   controller:

@@ -7,15 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry;
 import ru.CryptoPro.JCP.params.JCPProtectionParameter;
 
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Log4j2
 @Configuration
