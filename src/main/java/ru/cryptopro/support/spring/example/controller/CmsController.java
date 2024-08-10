@@ -1,6 +1,7 @@
 package ru.cryptopro.support.spring.example.controller;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.ContentDisposition;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import ru.CryptoPro.CAdES.exception.CAdESException;
 import ru.CryptoPro.CAdES.exception.EnvelopedException;
 import ru.CryptoPro.CAdES.exception.EnvelopedInvalidRecipientException;
+import ru.cryptopro.support.spring.example.config.CertConfig;
 import ru.cryptopro.support.spring.example.dto.SignatureParams;
 import ru.cryptopro.support.spring.example.dto.VerifyRequest;
 import ru.cryptopro.support.spring.example.dto.VerifyResult;
@@ -20,25 +22,22 @@ import ru.cryptopro.support.spring.example.expection.CryptographicException;
 import ru.cryptopro.support.spring.example.expection.ProvidedDataException;
 import ru.cryptopro.support.spring.example.service.SignService;
 import ru.cryptopro.support.spring.example.utils.CastX509Helper;
-import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
 
 @CrossOrigin
 @RestController
 @Log4j2
+@RequiredArgsConstructor
 @RequestMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 public class CmsController {
     private final SignService signService;
-
-    public CmsController(SignService signService) {
-        this.signService = signService;
-    }
+    private final CertConfig certConfig;
 
     @PostMapping(value = "${app.controller.encrypt}")
     public ResponseEntity<StreamingResponseBody> encrypt(
@@ -47,7 +46,9 @@ public class CmsController {
     ) {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
-        List<X509Certificate> x509Certificates = CastX509Helper.castCertificates(certs);
+        List<X509Certificate> x509Certificates = certs == null ?
+                Collections.singletonList(certConfig.getCertificate()) :
+                CastX509Helper.castCertificates(certs);
         ByteArrayOutputStream enveloped;
         try {
             enveloped = signService.encrypt(data.getInputStream(), x509Certificates);
@@ -89,7 +90,7 @@ public class CmsController {
     @PostMapping("${app.controller.sign}")
     public ResponseEntity<StreamingResponseBody> sign(
             @RequestParam MultipartFile data,
-            @RequestParam(required = false) boolean detached,
+            @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean detached,
             @RequestParam(required = false) @Schema(defaultValue = "http://testca2012.cryptopro.ru/tsp/tsp.srf") String tsp,
             @RequestParam(required = false) @Schema(defaultValue = "bes") String type
     ) {
@@ -108,15 +109,15 @@ public class CmsController {
         } catch (CAdESException | IOException e) {
             throw new CryptographicException("Sign failed: " + e.getMessage());
         }
-        ByteArrayOutputStream encodedSignature = (ByteArrayOutputStream) EncodingHelper.encodeStream(signature);
 
-        StreamingResponseBody response = encodedSignature::writeTo;
+        StreamingResponseBody response = signature::writeTo;
 
         ContentDisposition contentDisposition = ContentDisposition.inline()
                 .filename(data.getOriginalFilename() + ".sig", StandardCharsets.UTF_8)
                 .build();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDisposition(contentDisposition);
+        headers.setContentType(MediaType.TEXT_PLAIN);
         return ResponseEntity.ok().headers(headers).body(response);
     }
 
@@ -127,7 +128,7 @@ public class CmsController {
     ) {
         try {
             return signService.verify(new VerifyRequest(sign, data));
-        } catch (CAdESException e) {
+        } catch (CAdESException | IOException e) {
             throw new CryptographicException(e.getMessage());
         }
     }

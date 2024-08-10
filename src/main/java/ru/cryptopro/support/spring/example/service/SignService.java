@@ -2,17 +2,17 @@ package ru.cryptopro.support.spring.example.service;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import ru.CryptoPro.AdES.Options;
 import ru.CryptoPro.CAdES.*;
 import ru.CryptoPro.CAdES.exception.CAdESException;
 import ru.CryptoPro.CAdES.exception.EnvelopedException;
 import ru.CryptoPro.CAdES.exception.EnvelopedInvalidRecipientException;
 import ru.CryptoPro.JCP.tools.AlgorithmUtility;
-import ru.cryptopro.support.spring.example.dto.*;
 import ru.cryptopro.support.spring.example.config.StoreConfig;
+import ru.cryptopro.support.spring.example.dto.SignatureParams;
+import ru.cryptopro.support.spring.example.dto.VerifyRequest;
+import ru.cryptopro.support.spring.example.dto.VerifyResult;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
 import ru.cryptopro.support.spring.example.utils.CadesTypeHelper;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
@@ -58,20 +58,24 @@ public class SignService {
         }
 
         ByteArrayOutputStream enveloped = new ByteArrayOutputStream(BAOS_SIZE);
-        envelopedSignature.open(enveloped);
-        int read;
-        byte[] buffer = new byte[BUFFER_SIZE];
-        while ((read = data.read(buffer)) != -1) {
-            envelopedSignature.update(buffer, 0, read);
+        try (OutputStream wrapped = EncodingHelper.encodeStream(enveloped)) {
+            envelopedSignature.open(wrapped);
+            int read;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((read = data.read(buffer)) != -1) {
+                envelopedSignature.update(buffer, 0, read);
+            }
+            envelopedSignature.close();
+            return enveloped;
         }
-        envelopedSignature.close();
-        return enveloped;
     }
 
-    public ByteArrayOutputStream decrypt(InputStream encryptedCms) throws EnvelopedException, EnvelopedInvalidRecipientException {
+    public ByteArrayOutputStream decrypt(InputStream encryptedCms) throws EnvelopedException, EnvelopedInvalidRecipientException, IOException {
+        InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(encryptedCms);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(BAOS_SIZE);
-        EnvelopedSignature envelopedSignature = new EnvelopedSignature(encryptedCms);
+        EnvelopedSignature envelopedSignature = new EnvelopedSignature(tryToGuess);
         envelopedSignature.decrypt(certificate, privateKey, byteArrayOutputStream);
+        tryToGuess.close();
         return byteArrayOutputStream;
     }
 
@@ -102,22 +106,23 @@ public class SignService {
         );
 
         ByteArrayOutputStream signature = new ByteArrayOutputStream(BAOS_SIZE);
-        EncodingHelper.encodeStream(signature);
-        cAdESSignature.open(signature);
-        int read;
-        byte[] buffer = new byte[BUFFER_SIZE];
-        while ((read = data.read(buffer)) != -1) {
-            cAdESSignature.update(buffer, 0, read);
+        try (OutputStream wrapped = EncodingHelper.encodeStream(signature)) {
+            cAdESSignature.open(wrapped);
+            int read;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((read = data.read(buffer)) != -1) {
+                cAdESSignature.update(buffer, 0, read);
+            }
+            cAdESSignature.close();
+            data.close();
+            return signature;
         }
-        cAdESSignature.close();
-        data.close();
-        return signature;
     }
 
-    public List<VerifyResult> verify(VerifyRequest request) throws CAdESException {
-        CAdESSignature signature;
+    public List<VerifyResult> verify(VerifyRequest request) throws CAdESException, IOException {
         List<VerifyResult> results = new ArrayList<>();
-        signature = new CAdESSignature(request.getSign(), request.getData(), null);
+        InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(request.getSign());
+        CAdESSignature signature = new CAdESSignature(tryToGuess, request.getData(), null);
         signature.verify(null, null); // no exception ? everything is ok.
         CAdESSigner[] signers = signature.getCAdESSignerInfos();
         for (int i = 0; i < signers.length; i++) {
@@ -135,6 +140,8 @@ public class SignService {
 
             results.add(result);
         }
+        tryToGuess.close();
+        request.getData().close();
         return results;
     }
 }
