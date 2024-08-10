@@ -2,10 +2,23 @@ package ru.cryptopro.support.spring.example.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
+import ru.cryptopro.support.spring.example.expection.ProvidedDataException;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @Getter
-@AllArgsConstructor
 public class VerifyRequest {
-    final private byte[] sign;
-    final private byte[] data;
+    final private InputStream sign;
+    final private InputStream data;
+
+    public VerifyRequest(MultipartFile sign, MultipartFile data) {
+        try {
+            this.sign = sign.getInputStream();
+            this.data = data == null ? null : data.getInputStream();
+        } catch (IOException e) {
+            throw new ProvidedDataException(e.getMessage());
+        }
+    }
 }

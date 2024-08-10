@@ -7,9 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
 
 import java.security.cert.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -21,22 +19,8 @@ public class CertService {
         this.certificateSet = certificateSet;
     }
 
-    public List<X509Certificate> generateCertificate(List<MultipartFile> files) {
-        List<X509Certificate> result = new ArrayList<>();
-        try {
-            CertificateFactory factory = CertificateFactory.getInstance("X509");
-            for (MultipartFile file : files) {
-                X509Certificate cert = (X509Certificate) factory.generateCertificate(file.getInputStream());
-                result.add(cert);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
     public boolean validateCertificate(MultipartFile cert) {
-        boolean isValid = false;
+        boolean isValid;
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X509");
             X509Certificate certificate = (X509Certificate) factory.generateCertificate(cert.getInputStream());
@@ -58,7 +42,7 @@ public class CertService {
             CertPath certPath = result.getCertPath();
             log.info("certificate chain builted");
 
-            CertPathValidator certPathValidator = CertPathValidator.getInstance("CPPKIX","RevCheck");
+            CertPathValidator certPathValidator = CertPathValidator.getInstance("CPPKIX", "RevCheck");
             parameters.setRevocationEnabled(true);
             certPathValidator.validate(certPath, parameters);
             log.info("certificate chain validated");

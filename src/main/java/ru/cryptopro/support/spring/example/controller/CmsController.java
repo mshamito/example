@@ -3,22 +3,36 @@ package ru.cryptopro.support.spring.example.controller;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.cryptopro.support.spring.example.dto.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import ru.CryptoPro.CAdES.exception.CAdESException;
+import ru.CryptoPro.CAdES.exception.EnvelopedException;
+import ru.CryptoPro.CAdES.exception.EnvelopedInvalidRecipientException;
+import ru.cryptopro.support.spring.example.dto.SignatureParams;
+import ru.cryptopro.support.spring.example.dto.VerifyRequest;
+import ru.cryptopro.support.spring.example.dto.VerifyResult;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
 import ru.cryptopro.support.spring.example.expection.ProvidedDataException;
 import ru.cryptopro.support.spring.example.service.SignService;
+import ru.cryptopro.support.spring.example.utils.CastX509Helper;
+import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 @CrossOrigin
 @RestController
 @Log4j2
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+@RequestMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 public class CmsController {
     private final SignService signService;
 
@@ -26,32 +40,59 @@ public class CmsController {
         this.signService = signService;
     }
 
-    @PostMapping(value = "${app.controller.encrypt}", produces =MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<byte[]> encrypt(
+    @PostMapping(value = "${app.controller.encrypt}")
+    public ResponseEntity<StreamingResponseBody> encrypt(
             @RequestParam(value = "data") MultipartFile data,
             @RequestParam(required = false, value = "cert") List<MultipartFile> certs
-    ) throws IOException {
+    ) {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
-        return signService.encrypt(new DataDto(data.getBytes()), certs);
+        List<X509Certificate> x509Certificates = CastX509Helper.castCertificates(certs);
+        ByteArrayOutputStream enveloped;
+        try {
+            enveloped = signService.encrypt(data.getInputStream(), x509Certificates);
+        } catch (Exception e) {
+            throw new CryptographicException("Encrypt failed: " + e.getMessage());
+        }
+        StreamingResponseBody response = enveloped::writeTo;
+
+        ContentDisposition contentDisposition = ContentDisposition.inline()
+                .filename(data.getOriginalFilename() + ".enc", StandardCharsets.UTF_8)
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(contentDisposition);
+        return ResponseEntity.ok().headers(headers).body(response);
     }
 
-    @PostMapping(value = "${app.controller.decrypt}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<byte[]> decrypt(
+    @PostMapping(value = "${app.controller.decrypt}")
+    public ResponseEntity<StreamingResponseBody> decrypt(
             @RequestParam(value = "cms") MultipartFile encryptedCms
     ) throws IOException {
         if (encryptedCms.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
-        return signService.decrypt(encryptedCms);
+        ByteArrayOutputStream decrypted;
+        try {
+            decrypted = signService.decrypt(encryptedCms.getInputStream());
+        } catch (EnvelopedException | EnvelopedInvalidRecipientException e) {
+            throw new CryptographicException("Decrypt failed: " + e.getMessage());
+        }
+        StreamingResponseBody response = decrypted::writeTo;
+
+        ContentDisposition contentDisposition = ContentDisposition.inline()
+                .filename(encryptedCms.getOriginalFilename() + ".decrypted", StandardCharsets.UTF_8)
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(contentDisposition);
+        return ResponseEntity.ok().headers(headers).body(response);
     }
 
     @PostMapping("${app.controller.sign}")
-    public CmsDto sign(
+    public ResponseEntity<StreamingResponseBody> sign(
             @RequestParam MultipartFile data,
             @RequestParam(required = false) boolean detached,
             @RequestParam(required = false) @Schema(defaultValue = "http://testca2012.cryptopro.ru/tsp/tsp.srf") String tsp,
             @RequestParam(required = false) @Schema(defaultValue = "bes") String type
-    ) throws IOException {
+    ) {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
         SignatureParams.SignatureParamsBuilder builder = SignatureParams.builder();
@@ -61,17 +102,33 @@ public class CmsController {
         if (Strings.isNotBlank(type))
             builder.type(type);
         SignatureParams params = builder.build();
-        CmsDto response = signService.sign(new DataDto(data.getBytes()), params);
-        if (response.isEmpty())
-            throw new CryptographicException("sign failed");
-        return response;
+        ByteArrayOutputStream signature;
+        try {
+            signature = signService.sign(data.getInputStream(), params);
+        } catch (CAdESException | IOException e) {
+            throw new CryptographicException("Sign failed: " + e.getMessage());
+        }
+        ByteArrayOutputStream encodedSignature = (ByteArrayOutputStream) EncodingHelper.encodeStream(signature);
+
+        StreamingResponseBody response = encodedSignature::writeTo;
+
+        ContentDisposition contentDisposition = ContentDisposition.inline()
+                .filename(data.getOriginalFilename() + ".sig", StandardCharsets.UTF_8)
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(contentDisposition);
+        return ResponseEntity.ok().headers(headers).body(response);
     }
 
-    @PostMapping("${app.controller.verify}")
+    @PostMapping(value = "${app.controller.verify}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<VerifyResult> verify(
             @RequestParam MultipartFile sign,
             @RequestParam(required = false) MultipartFile data
-    ) throws IOException {
-        return signService.verify(new VerifyRequest(sign.getBytes(), data == null ? null : data.getBytes()));
+    ) {
+        try {
+            return signService.verify(new VerifyRequest(sign, data));
+        } catch (CAdESException e) {
+            throw new CryptographicException(e.getMessage());
+        }
     }
 }
