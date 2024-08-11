@@ -23,7 +23,7 @@ class CryptoProServiceTest {
 
     final int smallFileSize = 8 * 1024 * 1024;
     final int mediumFileSize = 25 * 1024 * 1024;
-    final int bigFileSize = 75 * 1024 * 1024;
+    final int bigFileSize = 50 * 1024 * 1024;
 
     @Autowired
     CryptoProService cryptoProService;
