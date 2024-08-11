@@ -21,4 +21,9 @@ public class VerifyRequest {
             throw new ProvidedDataException(e.getMessage());
         }
     }
+
+    public VerifyRequest(InputStream sign, InputStream data) {
+        this.sign = sign;
+        this.data = data;
+    }
 }

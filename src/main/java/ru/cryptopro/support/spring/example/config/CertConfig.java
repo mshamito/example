@@ -18,19 +18,20 @@ import java.util.*;
 public class CertConfig {
     private final StoreConfig storeConfig;
 
-    private X509Certificate certificate;
+    private final KeyStore keyStore;
 
     public CertConfig(StoreConfig storeConfig) {
         this.storeConfig = storeConfig;
+        this.keyStore = this.storeConfig.getKeyStore();
     }
 
     @Bean("cert")
     public X509Certificate getCertificate() {
-        if (certificate != null)
-            return certificate;
-
+        String alias = storeConfig.getAlias();
+        X509Certificate certificate;
         try {
-            certificate = (X509Certificate) storeConfig.getKeyStore().getCertificate(storeConfig.getAlias());
+
+            certificate = (X509Certificate) keyStore.getCertificate(alias);
             log.info("Certificate loaded from KeyStore");
         } catch (KeyStoreException e) {
             throw new RuntimeException(e);
@@ -44,7 +45,7 @@ public class CertConfig {
         PrivateKey privateKey = null;
         try {
             privateKey = ( //getEntry  нужен в случае работы jcsp и hsm
-                     (JCPPrivateKeyEntry) storeConfig.getKeyStore().getEntry(storeConfig.getAlias(), parameter)
+                    (JCPPrivateKeyEntry) keyStore.getEntry(storeConfig.getAlias(), parameter)
             ).getPrivateKey();
             log.info("PrivateKey loaded from alias: " + storeConfig.getAlias());
 

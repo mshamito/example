@@ -39,11 +39,11 @@ public class ClientTlsService {
     @SneakyThrows
     public String connect(ClienTlsDto clienTlsDto) {
 //        return connectHttpsURLConnection(clienTlsDto);
-        return connectOhHttp(clienTlsDto);
+        return connectOkHttp(clienTlsDto);
     }
 
     @SneakyThrows
-    public String connectOhHttp(ClienTlsDto clienTlsDto) {
+    public String connectOkHttp(ClienTlsDto clienTlsDto) {
         URL url = URI.create(clienTlsDto.getUrl()).toURL();
         String[] ciphers = new String[]{
                 "TLS_CIPHER_2001",

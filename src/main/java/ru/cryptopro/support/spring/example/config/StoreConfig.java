@@ -11,6 +11,8 @@ import java.security.KeyStore;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Collections;
+import java.util.List;
 
 @Log4j2
 @Getter
@@ -27,12 +29,22 @@ public class StoreConfig {
     private boolean isChainNeeded = false;
 
     public KeyStore getKeyStore() {
-        if (keyStore != null)
-            return keyStore;
         try {
             keyStore = KeyStore.getInstance(keyStoreName);
             keyStore.load(new StoreInputStream(alias), null);
             Certificate[] chain = keyStore.getCertificateChain(alias);
+
+            if (chain == null) {
+                KeyStore listKeyStore = KeyStore.getInstance(keyStoreName);
+                listKeyStore.load(null, null);
+                List<String> aliases = Collections.list(listKeyStore.aliases());
+                if (aliases.isEmpty())
+                    throw new RuntimeException("no alias on KeyStore " + keyStoreName);
+                StringBuilder builder = new StringBuilder("configured alias not found. available aliases:").append(System.lineSeparator());
+                for (String walk : aliases)
+                    builder.append(walk).append(System.lineSeparator());
+                throw new RuntimeException(builder.toString());
+            }
 
             log.debug("chain length: {} ", chain.length);
 

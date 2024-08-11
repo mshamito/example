@@ -32,6 +32,12 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.withType(JavaCompile) {
+test {
+    testLogging {
+        events "PASSED", "SKIPPED", "FAILED"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
     options.deprecation = true
 }
