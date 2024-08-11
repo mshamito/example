@@ -29,6 +29,8 @@ public class StoreConfig {
     private boolean isChainNeeded = false;
 
     public KeyStore getKeyStore() {
+        if (keyStore != null)
+            return keyStore;
         try {
             keyStore = KeyStore.getInstance(keyStoreName);
             keyStore.load(new StoreInputStream(alias), null);
