@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
+import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 
+import java.io.InputStream;
 import java.security.cert.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,7 +25,8 @@ public class CertService {
         boolean isValid;
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X509");
-            X509Certificate certificate = (X509Certificate) factory.generateCertificate(cert.getInputStream());
+            InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(cert.getInputStream());
+            X509Certificate certificate = (X509Certificate) factory.generateCertificate(tryToGuess);
             Set<TrustAnchor> trustAnchors = new HashSet<>();
             for (X509Certificate walk : certificateSet)
                 trustAnchors.add(new TrustAnchor(walk, null));
