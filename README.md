@@ -39,8 +39,6 @@ TYPE - тип подписи. допустимые значения: BES / T / X
 detached - отсоединенная (true) или присоединенная (false) подпись  
 encodeToB64 - в какой кодировке вернуть подпись. Base64 (true) или DER (false) 
 
-В ответ вернется base64 подпись
-
 ## проверка подписи
 ```shell
 curl http://localhost:8080/verify -F sign=@SIGN [ -F data=@DATA ]
