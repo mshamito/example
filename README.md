@@ -44,7 +44,7 @@ encodeToB64 - в какой кодировке вернуть подпись. Ba
 curl http://localhost:8080/verify -F sign=@SIGN [ -F data=@DATA ]
 ```
 где  
-SIGN - файл подписи
+SIGN - файл подписи  
 DATA - исходный файл для проверки в случае detached подписи  
 
 ## зашифрование
