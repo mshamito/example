@@ -4,6 +4,9 @@ export const config = {
   host: 'http://localhost:8080',
   tsp: 'http://testca2012.cryptopro.ru/tsp/tsp.srf',
   endpoint: {
-    sign: '/sign'
+    sign: '/sign',
+    verify: '/verify',
+    encrypt: '/encr',
+    decrypt: '/decr'
   }
 }
