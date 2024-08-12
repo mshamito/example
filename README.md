@@ -58,7 +58,7 @@ encodeToB64 - в какой кодировке вернуть подпись. Ba
 
 ## расшифрование
 ```shell
-curl http://localhost:8080/decr -F cms=@CMS [ -F cert=@CERT1 -F cert=@CERT2 -F encodeToB64=true ]
+curl http://localhost:8080/decr -F cms=@CMS 
 ```
 где  
 CMS - файл который необходимо расшифровать  
