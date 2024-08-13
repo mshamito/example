@@ -15,6 +15,7 @@ app:
     verify: "/verify"
     tls: "/tls"
     cert: "/cert"
+    raw-sign: "/raw-sign"
 server:
   port: 8080
 spring:

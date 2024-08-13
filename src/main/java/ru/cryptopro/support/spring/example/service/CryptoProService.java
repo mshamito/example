@@ -22,7 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.PrivateKey;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +57,7 @@ public class CryptoProService {
 
         try (
                 InputStream inputStream = data;
-                ByteArrayOutputStream enveloped = new ByteArrayOutputStream(BAOS_SIZE);
+                ByteArrayOutputStream enveloped = new ByteArrayOutputStream(BAOS_SIZE)
         ) {
             // DER output
             if (!encodeToB64) {
@@ -119,7 +119,7 @@ public class CryptoProService {
         boolean encodeToB64 = params.isEncodeToB64();
         try (
                 InputStream inputStream = data;
-                ByteArrayOutputStream signature = new ByteArrayOutputStream(BAOS_SIZE);
+                ByteArrayOutputStream signature = new ByteArrayOutputStream(BAOS_SIZE)
         ) {
             // DER output
             if (!encodeToB64) {
@@ -165,5 +165,28 @@ public class CryptoProService {
             }
         }
         return results;
+    }
+
+    public ByteArrayOutputStream signRaw(InputStream data, boolean encodeToB64) throws NoSuchAlgorithmException, IOException, SignatureException, InvalidKeyException {
+        String signOid = AlgorithmUtility.keyAlgToSignatureOid(privateKey.getAlgorithm());
+        String signatureAlgorithm = AlgorithmUtility.signOidToSignatureAlgorithm(signOid);
+        Signature signature = Signature.getInstance(signatureAlgorithm);
+        signature.initSign(privateKey);
+        StreamUpdateHelper.streamUpdateRawSignature(data, signature);
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(128)) {
+            // DER
+            if (!encodeToB64) {
+                byteArrayOutputStream.write(signature.sign());
+                return byteArrayOutputStream;
+            }
+
+            // base64 output
+            try (
+                    OutputStream wrapped = EncodingHelper.encodeStream(byteArrayOutputStream)
+            ) {
+                wrapped.write(signature.sign());
+                return byteArrayOutputStream;
+            }
+        }
     }
 }

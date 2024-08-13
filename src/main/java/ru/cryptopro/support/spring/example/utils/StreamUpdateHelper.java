@@ -6,6 +6,8 @@ import ru.CryptoPro.CAdES.exception.CAdESException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Signature;
+import java.security.SignatureException;
 
 public class StreamUpdateHelper {
     private final static int BUFFER_SIZE = 16 * 1024 * 1024;
@@ -28,5 +30,14 @@ public class StreamUpdateHelper {
         }
         inputStream.close();
         signature.close();
+    }
+
+    public static void streamUpdateRawSignature(InputStream inputStream, Signature signature) throws IOException, SignatureException {
+        int read;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        while ((read = inputStream.read(buffer)) != -1) {
+            signature.update(buffer, 0, read);
+        }
+        inputStream.close();
     }
 }
