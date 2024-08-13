@@ -8,7 +8,8 @@ import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry;
 import ru.CryptoPro.JCP.params.JCPProtectionParameter;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -39,6 +40,7 @@ public class CertConfig {
         return certificate;
     }
 
+    @SuppressWarnings("unused")
     @Bean("key")
     public PrivateKey getKey() {
         JCPProtectionParameter parameter = new JCPProtectionParameter(storeConfig.getPin().toCharArray());
@@ -47,7 +49,7 @@ public class CertConfig {
             privateKey = ( //getEntry  нужен в случае работы jcsp и hsm
                     (JCPPrivateKeyEntry) keyStore.getEntry(storeConfig.getAlias(), parameter)
             ).getPrivateKey();
-            log.info("PrivateKey loaded from alias: " + storeConfig.getAlias());
+            log.info("PrivateKey loaded from alias: {}",storeConfig.getAlias());
 
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
             e.printStackTrace();
@@ -55,17 +57,18 @@ public class CertConfig {
         return privateKey;
     }
 
+    @SuppressWarnings("unused")
     @SneakyThrows
     @Bean("certsFromCACerts")
-    public Set<X509Certificate> getCertsFromCacerts() {
+    public Set<X509Certificate> getCertsFromCaCerts() {
         Set<X509Certificate> result = new HashSet<>();
-        KeyStore cacerts = KeyStore.getInstance("JKS");
+        KeyStore caCerts = KeyStore.getInstance("JKS");
         String cacertsPath = System.getProperty("java.home") + "/lib/security/cacerts".replace("/", File.separator);
-        cacerts.load(new FileInputStream(cacertsPath), "changeit".toCharArray());
-        Enumeration<String> aliases = cacerts.aliases();
+        caCerts.load(Files.newInputStream(Paths.get(cacertsPath)), "changeit".toCharArray());
+        Enumeration<String> aliases = caCerts.aliases();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
-            result.add((X509Certificate) cacerts.getCertificate(alias));
+            result.add((X509Certificate) caCerts.getCertificate(alias));
         }
         return result;
     }

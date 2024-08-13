@@ -14,6 +14,7 @@ import java.security.cert.X509Certificate;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 @Log4j2
 @Configuration
 public class TrustManagerConfig {

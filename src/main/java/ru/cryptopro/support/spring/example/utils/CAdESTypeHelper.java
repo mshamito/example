@@ -5,7 +5,7 @@ import ru.CryptoPro.CAdES.CAdESType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CadesTypeHelper {
+public class CAdESTypeHelper {
     private static final HashMap<String, Integer> map = new HashMap<String, Integer>() {{
         put("bes", CAdESType.CAdES_BES);
         put("t", CAdESType.CAdES_T);

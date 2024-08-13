@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 @Log4j2
 @Configuration
 public class KeyManagerConfig {

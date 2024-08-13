@@ -1,6 +1,5 @@
 package ru.cryptopro.support.spring.example.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.expection.ProvidedDataException;

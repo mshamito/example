@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.service.CertService;
 
+@SuppressWarnings("unused")
 @RestController
 @CrossOrigin
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

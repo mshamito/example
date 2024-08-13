@@ -14,7 +14,7 @@ import ru.cryptopro.support.spring.example.dto.SignatureParams;
 import ru.cryptopro.support.spring.example.dto.VerifyRequest;
 import ru.cryptopro.support.spring.example.dto.VerifyResult;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
-import ru.cryptopro.support.spring.example.utils.CadesTypeHelper;
+import ru.cryptopro.support.spring.example.utils.CAdESTypeHelper;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 import ru.cryptopro.support.spring.example.utils.StreamUpdateHelper;
 
@@ -93,7 +93,7 @@ public class CryptoProService {
     public ByteArrayOutputStream sign(InputStream data, SignatureParams params) throws CAdESException, IOException {
         String digestOid = AlgorithmUtility.keyAlgToDigestOid(privateKey.getAlgorithm());
         String keyOid = AlgorithmUtility.keyAlgToKeyAlgorithmOid(privateKey.getAlgorithm());
-        int signatureType = CadesTypeHelper.mapValue(params.getType());
+        int signatureType = CAdESTypeHelper.mapValue(params.getType());
         String tsp = params.getTsp();
         if (Strings.isBlank(tsp) && (signatureType == CAdESType.CAdES_T || signatureType == CAdESType.CAdES_X_Long_Type_1))
             throw new CryptographicException("Tsp address is empty");
@@ -152,7 +152,7 @@ public class CryptoProService {
                 CAdESSigner signer = signers[i];
                 VerifyResult result = new VerifyResult();
                 result.setId(i);
-                result.setCAdESType(CadesTypeHelper.mapValue(
+                result.setCAdESType(CAdESTypeHelper.mapValue(
                         signer.getSignatureType()
                 ));
                 X509Certificate cert = signer.getSignerCertificate();

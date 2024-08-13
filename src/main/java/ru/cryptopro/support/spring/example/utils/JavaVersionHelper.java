@@ -6,7 +6,7 @@ import lombok.extern.log4j.Log4j2;
 public class JavaVersionHelper {
     public static int getVersion() {
         String version = System.getProperty("java.version");
-        log.info("running in JVM " + version);
+        log.info("running in JVM {}", version);
         if(version.startsWith("1.")) {
             version = version.substring(2, 3);
         } else {

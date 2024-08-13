@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ClienTlsDto {
+public class ClientTlsDto {
     private String url;
     private boolean mTLS;
 }

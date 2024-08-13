@@ -9,7 +9,7 @@ import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.cryptopro.support.spring.example.config.SSLContextConfig;
-import ru.cryptopro.support.spring.example.dto.ClienTlsDto;
+import ru.cryptopro.support.spring.example.dto.ClientTlsDto;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -37,13 +37,13 @@ public class ClientTlsService {
     }
 
     @SneakyThrows
-    public String connect(ClienTlsDto clienTlsDto) {
-//        return connectHttpsURLConnection(clienTlsDto);
+    public String connect(ClientTlsDto clienTlsDto) {
+//        return connectHttpsURLConnection(clientTlsDto);
         return connectOkHttp(clienTlsDto);
     }
 
     @SneakyThrows
-    public String connectOkHttp(ClienTlsDto clienTlsDto) {
+    public String connectOkHttp(ClientTlsDto clienTlsDto) {
         URL url = URI.create(clienTlsDto.getUrl()).toURL();
         String[] ciphers = new String[]{
                 "TLS_CIPHER_2001",
@@ -65,14 +65,18 @@ public class ClientTlsService {
         try (Response response = client.newCall(request).execute()) {
             log.info("Url: {}", clienTlsDto.getUrl());
             log.info("mTLS: {}", clienTlsDto.isMTLS());
+            if (response.handshake() == null)
+                throw new RuntimeException("Handshake is null!");
             log.info("Cipher: {}", response.handshake().cipherSuite());
             log.info("Status Code: {}", response.code());
+            if (response.body() == null)
+                throw new RuntimeException("Requested body is null");
             return response.body().string();
         }
     }
 
     @SneakyThrows
-    public String connectHttpsURLConnection(ClienTlsDto clienTlsDto) {
+    public String connectHttpsURLConnection(ClientTlsDto clienTlsDto) {
         URL url = URI.create(clienTlsDto.getUrl()).toURL();
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
         connection.setSSLSocketFactory(contextConfig.getInstance(clienTlsDto.isMTLS()).getSocketFactory());
@@ -86,11 +90,11 @@ public class ClientTlsService {
         Class<?>[] classes = {InputStream.class};
         BufferedReader in = new BufferedReader(
                 new InputStreamReader((InputStream) connection.getContent(classes)));
-        String content = "";
+        StringBuilder content = new StringBuilder();
         String current;
         while((current = in.readLine()) != null) {
-            content += current;
+            content.append(current);
         }
-        return content;
+        return content.toString();
     }
 }

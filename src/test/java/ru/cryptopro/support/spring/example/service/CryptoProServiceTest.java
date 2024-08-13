@@ -29,7 +29,7 @@ class CryptoProServiceTest {
     CryptoProService cryptoProService;
 
     @Test
-    void encryptionSmall() throws Exception {
+    void encryptionSmall() {
         byte[] small = genFile(smallFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(small));
         assertDoesNotThrow(() -> {
@@ -42,7 +42,7 @@ class CryptoProServiceTest {
     }
 
     @Test
-    void encryptionMedium() throws Exception {
+    void encryptionMedium() {
         byte[] medium = genFile(mediumFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(medium));
         assertDoesNotThrow(() -> {
@@ -55,7 +55,7 @@ class CryptoProServiceTest {
     }
 
     @Test
-    void encryptionBig() throws Exception {
+    void encryptionBig() {
         byte[] big = genFile(bigFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(big));
         assertDoesNotThrow(() -> {
@@ -129,7 +129,7 @@ class CryptoProServiceTest {
     }
 
     private byte[] gostHash(byte[] data) {
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance(JCP.GOST_DIGEST_2012_256_NAME);
         } catch (NoSuchAlgorithmException e) {

@@ -8,6 +8,7 @@ import ru.cryptopro.support.spring.example.expection.handler.helper.ErrorMessage
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 @ControllerAdvice
 public class CryptographicExceptionHandler {
     @ExceptionHandler(CryptographicException.class)

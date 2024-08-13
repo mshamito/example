@@ -4,7 +4,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.cryptopro.support.spring.example.expection.CryptographicException;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 
 import java.io.InputStream;
@@ -22,7 +21,6 @@ public class CertService {
     }
 
     public boolean validateCertificate(MultipartFile cert) {
-        boolean isValid;
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X509");
             InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(cert.getInputStream());
@@ -49,11 +47,10 @@ public class CertService {
             parameters.setRevocationEnabled(true);
             certPathValidator.validate(certPath, parameters);
             log.info("certificate chain validated");
-            isValid = true;
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CryptographicException(e.getMessage());
+            return false;
         }
-        return isValid;
     }
 }

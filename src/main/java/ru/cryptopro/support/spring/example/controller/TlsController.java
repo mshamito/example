@@ -1,11 +1,14 @@
 package ru.cryptopro.support.spring.example.controller;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-import ru.cryptopro.support.spring.example.dto.ClienTlsDto;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import ru.cryptopro.support.spring.example.dto.ClientTlsDto;
 import ru.cryptopro.support.spring.example.service.ClientTlsService;
 
+@SuppressWarnings("unused")
 @CrossOrigin
 @RestController
 public class TlsController {
@@ -19,8 +22,8 @@ public class TlsController {
     public String tls(
             @RequestParam boolean mTLS,
             @RequestParam @Schema(defaultValue = "https://cryptopro.ru") String url
-            ) {
-        return tlsService.connect(ClienTlsDto.builder()
+    ) {
+        return tlsService.connect(ClientTlsDto.builder()
                 .url(url)
                 .mTLS(mTLS)
                 .build());

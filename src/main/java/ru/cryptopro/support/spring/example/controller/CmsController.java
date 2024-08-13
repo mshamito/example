@@ -30,6 +30,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings("unused")
 @CrossOrigin
 @RestController
 @Log4j2
