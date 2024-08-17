@@ -33,6 +33,7 @@ public class StoreConfig {
         if (keyStore != null)
             return keyStore;
         try {
+            validateStore();
             keyStore = KeyStore.getInstance(keyStoreName);
             keyStore.load(new StoreInputStream(alias), null);
             Certificate[] chain = keyStore.getCertificateChain(alias);
@@ -61,6 +62,29 @@ public class StoreConfig {
             throw new RuntimeException(e);
         }
         return keyStore;
+    }
+
+    private void validateStore() {
+        try {
+            KeyStore fullKeyStore = KeyStore.getInstance(keyStoreName);
+            fullKeyStore.load(null,null);
+            List<String> aliases = Collections.list(fullKeyStore.aliases());
+            if (aliases.isEmpty())
+                throw new RuntimeException("empty KeyStore");
+            log.info("available aliases:");
+            for (String walk : aliases)
+                log.info(walk);
+            log.info("checking configured alias");
+            if (!aliases.contains(alias)) {
+                log.error("alias {} not found in {}", alias, keyStoreName);
+                throw new RuntimeException(String.format("configured alias %s not found", alias));
+            }
+            log.info("configured alias found. try to load");
+
+        } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 
