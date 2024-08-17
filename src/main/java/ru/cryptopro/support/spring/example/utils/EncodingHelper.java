@@ -8,6 +8,10 @@ public class EncodingHelper {
         return Base64.getMimeEncoder().wrap(outputStream);
     }
 
+    public static byte[] encode(byte[] bytes) {
+        return Base64.getEncoder().encode(bytes);
+    }
+
     public static InputStream decodeDerOrB64Stream(InputStream inputStream) throws IOException {
         int firstByteCount = 2;
         byte[] firstBytes = new byte[firstByteCount];

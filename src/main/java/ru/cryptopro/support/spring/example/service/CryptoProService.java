@@ -1,5 +1,6 @@
 package ru.cryptopro.support.spring.example.service;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -167,26 +168,17 @@ public class CryptoProService {
         return results;
     }
 
-    public ByteArrayOutputStream signRaw(InputStream data, boolean encodeToB64) throws NoSuchAlgorithmException, IOException, SignatureException, InvalidKeyException {
+    public byte[] signRaw(InputStream data, boolean encodeToB64, boolean invert) throws NoSuchAlgorithmException, IOException, SignatureException, InvalidKeyException {
         String signOid = AlgorithmUtility.keyAlgToSignatureOid(privateKey.getAlgorithm());
         String signatureAlgorithm = AlgorithmUtility.signOidToSignatureAlgorithm(signOid);
         Signature signature = Signature.getInstance(signatureAlgorithm);
         signature.initSign(privateKey);
         StreamUpdateHelper.streamUpdateRawSignature(data, signature);
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(128)) {
-            // DER
-            if (!encodeToB64) {
-                byteArrayOutputStream.write(signature.sign());
-                return byteArrayOutputStream;
-            }
-
-            // base64 output
-            try (
-                    OutputStream wrapped = EncodingHelper.encodeStream(byteArrayOutputStream)
-            ) {
-                wrapped.write(signature.sign());
-                return byteArrayOutputStream;
-            }
-        }
+        byte[] sign = signature.sign();
+        if (invert)
+            ArrayUtils.reverse(sign);
+        if (encodeToB64)
+            return EncodingHelper.encode(sign);
+        return sign;
     }
 }

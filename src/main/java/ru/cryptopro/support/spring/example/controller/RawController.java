@@ -28,21 +28,17 @@ public class RawController {
     private final CryptoProService cryptoProService;
 
     @PostMapping(value = "${app.controller.raw-sign}")
-    public ResponseEntity<?> rawSign(
+    public ResponseEntity<byte[]> rawSign(
             @RequestParam(value = "data") MultipartFile data,
-            @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean encodeToB64
+            @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean encodeToB64,
+            @RequestParam(required = false, defaultValue = "false") @Schema(defaultValue = "false", type = "boolean") boolean invert
     ) {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
         HttpHeaders headers = HeadersHelper.prepareHeaders(data.getOriginalFilename(), ".bin");
         MediaType mediaType = encodeToB64 ? MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
         try {
-            byte[] sign = cryptoProService.signRaw(data.getInputStream(), encodeToB64).toByteArray();
-            if (encodeToB64)
-                return ResponseEntity.ok()
-                        .headers(headers)
-                        .contentType(mediaType)
-                        .body(new String(sign).replace("\r", "").replace("\n", ""));
+            byte[] sign = cryptoProService.signRaw(data.getInputStream(), encodeToB64, invert);
             return ResponseEntity.ok()
                     .headers(headers)
                     .contentType(mediaType)
