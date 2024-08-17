@@ -4,8 +4,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.cryptopro.support.spring.example.utils.CastX509Helper;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.*;
 import java.util.HashSet;
@@ -20,11 +22,13 @@ public class CertService {
         this.certificateSet = certificateSet;
     }
 
+
     public boolean validateCertificate(MultipartFile cert) {
+        return validateCertificate(CastX509Helper.castCertificate(cert));
+    }
+
+    public boolean validateCertificate(X509Certificate cert) {
         try {
-            CertificateFactory factory = CertificateFactory.getInstance("X509");
-            InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(cert.getInputStream());
-            X509Certificate certificate = (X509Certificate) factory.generateCertificate(tryToGuess);
             Set<TrustAnchor> trustAnchors = new HashSet<>();
             for (X509Certificate walk : certificateSet)
                 trustAnchors.add(new TrustAnchor(walk, null));
@@ -34,7 +38,7 @@ public class CertService {
             CertStore store = CertStore.getInstance("Collection", certStoreParameters);
             parameters.addCertStore(store);
             X509CertSelector selector = new X509CertSelector();
-            selector.setCertificate(certificate);
+            selector.setCertificate(cert);
             parameters.setTargetCertConstraints(selector);
             parameters.setRevocationEnabled(false);
             PKIXCertPathBuilderResult result =

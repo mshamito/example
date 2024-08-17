@@ -181,4 +181,15 @@ public class CryptoProService {
             return EncodingHelper.encode(sign);
         return sign;
     }
+
+    public boolean verifyRaw(InputStream data, byte[] sign, X509Certificate cert, boolean invert) throws InvalidKeyException, NoSuchAlgorithmException, IOException, SignatureException {
+        String signOid = AlgorithmUtility.keyAlgToSignatureOid(cert.getPublicKey().getAlgorithm());
+        String signatureAlgorithm = AlgorithmUtility.signOidToSignatureAlgorithm(signOid);
+        Signature signature = Signature.getInstance(signatureAlgorithm);
+        signature.initVerify(cert.getPublicKey());
+        StreamUpdateHelper.streamUpdateRawSignature(data, signature);
+        if (invert)
+            ArrayUtils.reverse(sign);
+        return signature.verify(sign);
+    }
 }

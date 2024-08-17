@@ -4,6 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -16,12 +17,21 @@ public class CastX509Helper {
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X509");
             for (MultipartFile file : files) {
-                X509Certificate cert = (X509Certificate) factory.generateCertificate(file.getInputStream());
+                X509Certificate cert = (X509Certificate) factory.generateCertificate(EncodingHelper.decodeDerOrB64Stream(file.getInputStream()));
                 result.add(cert);
             }
         } catch (CertificateException | IOException e) {
             throw new CryptographicException("Certificate cast failed: " + e.getMessage());
         }
         return result;
+    }
+    public static X509Certificate castCertificate(MultipartFile file) {
+        try {
+            CertificateFactory factory = CertificateFactory.getInstance("X509");
+            InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(file.getInputStream());
+            return (X509Certificate) factory.generateCertificate(tryToGuess);
+        } catch (IOException | CertificateException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

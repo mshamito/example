@@ -12,6 +12,10 @@ public class EncodingHelper {
         return Base64.getEncoder().encode(bytes);
     }
 
+    public static byte[] decode(String string) {
+        return Base64.getDecoder().decode(string);
+    }
+
     public static InputStream decodeDerOrB64Stream(InputStream inputStream) throws IOException {
         int firstByteCount = 2;
         byte[] firstBytes = new byte[firstByteCount];
