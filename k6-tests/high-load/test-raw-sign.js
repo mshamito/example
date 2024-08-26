@@ -6,7 +6,7 @@ import { config } from '../config.js'
 export { options } from '../options.js'
 
 const BASE_URL = config.host;
-const ENDPOINT = config.endpoint.sign;
+const ENDPOINT = config.endpoint.rawSign;
 const DATA = 'data to sign'
 const TYPE = config.type;
 const TSP = config.tsp;
@@ -14,15 +14,14 @@ const TSP = config.tsp;
 export default () => {
 
   const fd = new FormData()
-  fd.append('type', TYPE)
-  fd.append('tsp', TSP)
-  fd.append('detached', 'true')
   fd.append('data', { data: DATA, filename: 'data.bin', content_type: 'application/octet-stream' })
+  fd.append('encodeB64', false)
+  fd.append('invert', false)
 
   const headers = {'Content-Type': 'multipart/form-data; boundary=' + fd.boundary}
 
   const res = http.post(`${BASE_URL}${ENDPOINT}`, fd.body(), { headers: headers });
   check(res, {
-    'sign test status is 200': (r) => r.status === 200
+    'raw sign test status is 200': (r) => r.status === 200
   });
 }
