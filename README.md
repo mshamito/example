@@ -53,7 +53,7 @@ curl http://localhost:8080/encr -F data=@DATA [ -F cert=@CERT1 -F cert=@CERT2 -F
 ```
 где  
 DATA - файл который необходимо зашифровать  
-CERTN - сертификат(ы) получателя(ей),   
+CERTN - сертификат(ы) получателя(ей)   
 encodeToB64 - в какой кодировке вернуть подпись. Base64 (true) или DER (false)
 
 ## расшифрование
@@ -63,6 +63,26 @@ curl http://localhost:8080/decr -F cms=@CMS
 где  
 CMS - файл который необходимо расшифровать  
 
+## создание сырой подписи
+```shell
+curl http://localhost:8080/raw/sign -F data=@DATA [ -F encodeToB64=true -F invert=false]
+```
+где  
+DATA - файл который необходимо подписать  
+encodeToB64 - в какой кодировке вернуть подпись. Base64 (true) или DER (false)  
+invert - перевернуть ли значение подписи (invert Endianness)  
+
+
+## проверка сырой подписи
+```shell
+curl http://localhost:8080/raw/verify -F data=@DATA [ -F cert=@CERT -F signBase64="base64" -F signBinary=@sign.bin -F invert=false]
+```
+где  
+DATA - файл который необходимо зашифровать  
+CERT - сертификат для проверки
+signBinary - бинарная подпись в файле  
+signBase64 - подпись в base64 строке  
+invert - перевернуть ли значение подписи (invert Endianness)
 
 # Доступен Swagger
 ```http://localhost:8080/swagger-ui/index.html```
