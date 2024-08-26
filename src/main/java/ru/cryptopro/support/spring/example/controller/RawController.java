@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
 import ru.cryptopro.support.spring.example.expection.ProvidedDataException;
-import ru.cryptopro.support.spring.example.service.CryptoProService;
+import ru.cryptopro.support.spring.example.service.RawService;
 import ru.cryptopro.support.spring.example.utils.CastX509Helper;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 import ru.cryptopro.support.spring.example.utils.HeadersHelper;
@@ -29,19 +29,19 @@ import java.security.cert.X509Certificate;
 @RequestMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 public class RawController {
     private final X509Certificate certificate;
-    private final CryptoProService cryptoProService;
+    private final RawService rawService;
 
     public RawController(
-            CryptoProService cryptoProService,
+            RawService rawService,
             @Qualifier("cert")
             X509Certificate certificate
     ) {
-        this.cryptoProService = cryptoProService;
+        this.rawService = rawService;
         this.certificate = certificate;
     }
 
     @PostMapping(value = "${app.controller.raw-sign}")
-    public ResponseEntity<byte[]> rawSign(
+    public ResponseEntity<byte[]> sign(
             @RequestParam(value = "data") MultipartFile data,
             @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean encodeToB64,
             @RequestParam(required = false, defaultValue = "false") @Schema(defaultValue = "false", type = "boolean") boolean invert
@@ -51,7 +51,7 @@ public class RawController {
         HttpHeaders headers = HeadersHelper.prepareHeaders(data.getOriginalFilename(), ".bin");
         MediaType mediaType = encodeToB64 ? MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
         try {
-            byte[] sign = cryptoProService.signRaw(data.getInputStream(), encodeToB64, invert);
+            byte[] sign = rawService.sign(data.getInputStream(), encodeToB64, invert);
             return ResponseEntity.ok()
                     .headers(headers)
                     .contentType(mediaType)
@@ -77,7 +77,7 @@ public class RawController {
         X509Certificate x509Certificate = cert == null ? certificate : CastX509Helper.castCertificate(cert);
         try {
             byte[] sign = Strings.isEmpty(signBase64) ? signBinary.getBytes() : EncodingHelper.decode(signBase64);
-            boolean result = cryptoProService.verifyRaw(data.getInputStream(), sign, x509Certificate, invert);
+            boolean result = rawService.verify(data.getInputStream(), sign, x509Certificate, invert);
             return ResponseEntity.ok(result ? "true" : " false");
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException | SignatureException e) {
             throw new CryptographicException(e.getMessage());

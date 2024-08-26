@@ -19,7 +19,7 @@ import ru.cryptopro.support.spring.example.dto.VerifyRequest;
 import ru.cryptopro.support.spring.example.dto.VerifyResult;
 import ru.cryptopro.support.spring.example.expection.CryptographicException;
 import ru.cryptopro.support.spring.example.expection.ProvidedDataException;
-import ru.cryptopro.support.spring.example.service.CryptoProService;
+import ru.cryptopro.support.spring.example.service.CmsService;
 import ru.cryptopro.support.spring.example.utils.CastX509Helper;
 import ru.cryptopro.support.spring.example.utils.HeadersHelper;
 
@@ -37,7 +37,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 public class CmsController {
-    private final CryptoProService cryptoProService;
+    private final CmsService cmsService;
     private final CertConfig certConfig;
 
     @PostMapping(value = "${app.controller.encrypt}")
@@ -57,7 +57,7 @@ public class CmsController {
 
         try (
                 InputStream inputStream = data.getInputStream();
-                ByteArrayOutputStream enveloped = cryptoProService.encrypt(inputStream, x509Certificates, encodeToB64)
+                ByteArrayOutputStream enveloped = cmsService.encrypt(inputStream, x509Certificates, encodeToB64)
         ) {
             StreamingResponseBody response = enveloped::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
@@ -77,7 +77,7 @@ public class CmsController {
 
         try (
                 InputStream inputStream = encryptedCms.getInputStream();
-                ByteArrayOutputStream decrypted = cryptoProService.decrypt(inputStream)
+                ByteArrayOutputStream decrypted = cmsService.decrypt(inputStream)
         ) {
             StreamingResponseBody response = decrypted::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_OCTET_STREAM).body(response);
@@ -111,7 +111,7 @@ public class CmsController {
 
         try (
                 InputStream inputStream = data.getInputStream();
-                ByteArrayOutputStream signature = cryptoProService.sign(inputStream, params)
+                ByteArrayOutputStream signature = cmsService.sign(inputStream, params)
         ) {
             StreamingResponseBody response = signature::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
@@ -126,7 +126,7 @@ public class CmsController {
             @RequestParam(required = false) MultipartFile data
     ) {
         try {
-            return cryptoProService.verify(new VerifyRequest(sign, data));
+            return cmsService.verify(new VerifyRequest(sign, data));
         } catch (CAdESException | IOException e) {
             throw new CryptographicException(e.getMessage());
         }

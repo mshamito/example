@@ -19,22 +19,22 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 
 @SpringBootTest
-class CryptoProServiceTest {
+class CmsServiceTest {
 
     final int smallFileSize = 8 * 1024 * 1024;
     final int mediumFileSize = 25 * 1024 * 1024;
     final int bigFileSize = 50 * 1024 * 1024;
 
     @Autowired
-    CryptoProService cryptoProService;
+    CmsService cmsService;
 
     @Test
     void encryptionSmall() {
         byte[] small = genFile(smallFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(small));
         assertDoesNotThrow(() -> {
-                    byte[] encoded = cryptoProService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), false).toByteArray();
-                    byte[] decrypted = cryptoProService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), false).toByteArray();
+                    byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
                     byte[] hash = gostHash(decrypted);
                     assertArrayEquals(asyncDataHash.get(), hash);
                 }
@@ -46,8 +46,8 @@ class CryptoProServiceTest {
         byte[] medium = genFile(mediumFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(medium));
         assertDoesNotThrow(() -> {
-                    byte[] encoded = cryptoProService.encrypt(new ByteArrayInputStream(medium), Collections.emptyList(), false).toByteArray();
-                    byte[] decrypted = cryptoProService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(medium), Collections.emptyList(), false).toByteArray();
+                    byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
                     byte[] hash = gostHash(decrypted);
                     assertArrayEquals(asyncDataHash.get(), hash);
                 }
@@ -59,8 +59,8 @@ class CryptoProServiceTest {
         byte[] big = genFile(bigFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(big));
         assertDoesNotThrow(() -> {
-                    byte[] encoded = cryptoProService.encrypt(new ByteArrayInputStream(big), Collections.emptyList(), false).toByteArray();
-                    byte[] decrypted = cryptoProService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(big), Collections.emptyList(), false).toByteArray();
+                    byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
                     byte[] hash = gostHash(decrypted);
                     assertArrayEquals(asyncDataHash.get(), hash);
                 }
@@ -75,12 +75,12 @@ class CryptoProServiceTest {
                 .detached(false)
                 .build();
         assertDoesNotThrow(() -> {
-                    byte[] sign = cryptoProService.sign(new ByteArrayInputStream(small), params).toByteArray();
+                    byte[] sign = cmsService.sign(new ByteArrayInputStream(small), params).toByteArray();
                     VerifyRequest verifyRequest = new VerifyRequest(
                             new ByteArrayInputStream(sign),
                             new ByteArrayInputStream(small)
                     );
-                    assertDoesNotThrow(() -> cryptoProService.verify(verifyRequest));
+                    assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
                 }
         );
     }
@@ -93,12 +93,12 @@ class CryptoProServiceTest {
                 .detached(false)
                 .build();
         assertDoesNotThrow(() -> {
-                    byte[] sign = cryptoProService.sign(new ByteArrayInputStream(medium), params).toByteArray();
+                    byte[] sign = cmsService.sign(new ByteArrayInputStream(medium), params).toByteArray();
                     VerifyRequest verifyRequest = new VerifyRequest(
                             new ByteArrayInputStream(sign),
                             new ByteArrayInputStream(medium)
                     );
-                    assertDoesNotThrow(() -> cryptoProService.verify(verifyRequest));
+                    assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
                 }
         );
     }
@@ -111,12 +111,12 @@ class CryptoProServiceTest {
                 .detached(true)
                 .build();
         assertDoesNotThrow(() -> {
-                    byte[] sign = cryptoProService.sign(new ByteArrayInputStream(big), params).toByteArray();
+                    byte[] sign = cmsService.sign(new ByteArrayInputStream(big), params).toByteArray();
                     VerifyRequest verifyRequest = new VerifyRequest(
                             new ByteArrayInputStream(sign),
                             new ByteArrayInputStream(big)
                     );
-                    assertDoesNotThrow(() -> cryptoProService.verify(verifyRequest));
+                    assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
                 }
         );
     }
