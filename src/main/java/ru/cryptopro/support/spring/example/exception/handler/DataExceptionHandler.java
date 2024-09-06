@@ -1,10 +1,10 @@
-package ru.cryptopro.support.spring.example.expection.handler;
+package ru.cryptopro.support.spring.example.exception.handler;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.cryptopro.support.spring.example.expection.ProvidedDataException;
-import ru.cryptopro.support.spring.example.expection.handler.helper.ErrorMessageHelper;
+import ru.cryptopro.support.spring.example.exception.ProvidedDataException;
+import ru.cryptopro.support.spring.example.exception.handler.helper.ErrorMessageHelper;
 
 import java.util.Map;
 

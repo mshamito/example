@@ -13,7 +13,7 @@ import ru.cryptopro.support.spring.example.config.StoreConfig;
 import ru.cryptopro.support.spring.example.dto.SignatureParams;
 import ru.cryptopro.support.spring.example.dto.VerifyRequest;
 import ru.cryptopro.support.spring.example.dto.VerifyResult;
-import ru.cryptopro.support.spring.example.expection.CryptographicException;
+import ru.cryptopro.support.spring.example.exception.CryptographicException;
 import ru.cryptopro.support.spring.example.utils.CAdESTypeHelper;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 import ru.cryptopro.support.spring.example.utils.StreamUpdateHelper;

@@ -1,4 +1,4 @@
-package ru.cryptopro.support.spring.example.expection.handler.helper;
+package ru.cryptopro.support.spring.example.exception.handler.helper;
 
 import java.util.HashMap;
 import java.util.Map;

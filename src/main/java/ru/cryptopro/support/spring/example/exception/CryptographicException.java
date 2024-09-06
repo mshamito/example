@@ -1,4 +1,4 @@
-package ru.cryptopro.support.spring.example.expection;
+package ru.cryptopro.support.spring.example.exception;
 
 import lombok.extern.log4j.Log4j2;
 

@@ -1,7 +1,7 @@
 package ru.cryptopro.support.spring.example.utils;
 
 import org.springframework.web.multipart.MultipartFile;
-import ru.cryptopro.support.spring.example.expection.CryptographicException;
+import ru.cryptopro.support.spring.example.exception.CryptographicException;
 
 import java.io.IOException;
 import java.io.InputStream;
