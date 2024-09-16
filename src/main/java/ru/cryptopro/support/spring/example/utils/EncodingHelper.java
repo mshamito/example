@@ -1,8 +1,11 @@
 package ru.cryptopro.support.spring.example.utils;
 
+import lombok.extern.log4j.Log4j2;
+
 import java.io.*;
 import java.util.Base64;
 
+@Log4j2
 public class EncodingHelper {
     public static OutputStream encodeStream(OutputStream outputStream) {
         return Base64.getMimeEncoder().wrap(outputStream);
@@ -30,8 +33,9 @@ public class EncodingHelper {
             try {
                 return Base64.getMimeDecoder().wrap(mergedStream);
             } catch (Exception e) {
-                e.printStackTrace();
-                throw new IOException("IOException while decoding Base64 stream: " + e.getMessage());
+                log.error("IOException while decoding Base64 stream: {}", e.getMessage());
+                log.error(e);
+                throw new IOException(e);
             }
         }
         // return original stream

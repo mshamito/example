@@ -14,9 +14,9 @@ public class CAdESTypeHelper {
     }};
 
     public static int mapValue(String type) {
-        String tmp = type.toLowerCase();
-        if (map.containsKey(tmp))
-            return map.get(tmp);
+        String key = type.toLowerCase();
+        if (map.containsKey(key))
+            return map.get(key);
         // fallback
         return map.get("bes");
     }

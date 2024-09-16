@@ -7,11 +7,11 @@ import lombok.Getter;
 @Builder
 public class SignatureParams {
     @Builder.Default
-    private final boolean detached = false;
+    private boolean detached = false;
     @Builder.Default
-    private final boolean encodeToB64 = true;
+    private boolean encodeToB64 = true;
     @Builder.Default
-    private final String tsp = "";
+    private String tsp = "";
     @Builder.Default
-    private final String type = "bes";
+    private String type = "bes";
 }

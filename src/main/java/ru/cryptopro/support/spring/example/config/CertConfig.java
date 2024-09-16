@@ -31,7 +31,6 @@ public class CertConfig {
         String alias = storeConfig.getAlias();
         X509Certificate certificate;
         try {
-
             certificate = (X509Certificate) keyStore.getCertificate(alias);
             log.info("Certificate loaded from KeyStore");
         } catch (KeyStoreException e) {
@@ -50,9 +49,8 @@ public class CertConfig {
                     (JCPPrivateKeyEntry) keyStore.getEntry(storeConfig.getAlias(), parameter)
             ).getPrivateKey();
             log.info("PrivateKey loaded from alias: {}",storeConfig.getAlias());
-
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
-            e.printStackTrace();
+            log.error(e);
         }
         return privateKey;
     }
@@ -63,8 +61,8 @@ public class CertConfig {
     public Set<X509Certificate> getCertsFromCaCerts() {
         Set<X509Certificate> result = new HashSet<>();
         KeyStore caCerts = KeyStore.getInstance("JKS");
-        String cacertsPath = System.getProperty("java.home") + "/lib/security/cacerts".replace("/", File.separator);
-        caCerts.load(Files.newInputStream(Paths.get(cacertsPath)), "changeit".toCharArray());
+        String caCertsPath = System.getProperty("java.home") + "/lib/security/cacerts".replace("/", File.separator);
+        caCerts.load(Files.newInputStream(Paths.get(caCertsPath)), "changeit".toCharArray());
         Enumeration<String> aliases = caCerts.aliases();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
