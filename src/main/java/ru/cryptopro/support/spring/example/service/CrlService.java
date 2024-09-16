@@ -6,8 +6,9 @@ import ru.cryptopro.support.spring.example.config.CrlConfig;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -36,11 +37,9 @@ public class CrlService {
 
     private Optional<X509CRL> generateCrl(String filename) {
         File file = new File(BASE_DIR, filename);
-        try {
+        try (InputStream stream = Files.newInputStream(file.toPath())) {
             return Optional.of((X509CRL) factory.generateCRL(
-                    EncodingHelper.decodeDerOrB64Stream(
-                            new FileInputStream(file)
-                    )
+                    EncodingHelper.decodeDerOrB64Stream(stream)
             ));
         } catch (CRLException | IOException e) {
             log.error(e);

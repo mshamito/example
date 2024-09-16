@@ -92,7 +92,7 @@ public class ClientTlsService {
                 new InputStreamReader((InputStream) connection.getContent(classes)));
         StringBuilder content = new StringBuilder();
         String current;
-        while((current = in.readLine()) != null) {
+        while ((current = in.readLine()) != null) {
             content.append(current);
         }
         return content.toString();

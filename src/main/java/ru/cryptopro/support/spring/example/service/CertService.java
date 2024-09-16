@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.cryptopro.support.spring.example.utils.CastX509Helper;
-import ru.cryptopro.support.spring.example.utils.EncodingHelper;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.cert.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -53,7 +50,7 @@ public class CertService {
             log.info("certificate chain validated");
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e);
             return false;
         }
     }
