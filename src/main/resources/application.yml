@@ -1,13 +1,14 @@
 app:
   cp:
 #    for JCSP
-    keystore: HDIMAGE
+    keystorename: HDIMAGE
 
 #    for JCP
-#    keystore: HDImageStore
+#    keystorename: HDImageStore
 
     alias: test2012
     pin: ""
+    crl-folder: "crls"
   controller:
     encrypt: "/encr"
     decrypt: "/decr"

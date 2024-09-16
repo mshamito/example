@@ -23,26 +23,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.PrivateKey;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class CmsService {
     private final StoreConfig storeConfig;
-    final X509Certificate certificate;
-    final PrivateKey privateKey;
+    private final X509Certificate certificate;
+    private final PrivateKey privateKey;
     private final int BAOS_SIZE = 16 * 1024;
+    private final Set<X509CRL> localCRLs;
 
     public CmsService(
             StoreConfig storeConfig,
             @Qualifier("cert") X509Certificate certificate,
-            @Qualifier("key") PrivateKey privateKey
+            @Qualifier("key") PrivateKey privateKey,
+            CrlService crlService
     ) {
         this.storeConfig = storeConfig;
         this.certificate = certificate;
         this.privateKey = privateKey;
+        this.localCRLs = crlService.getLocalCRLs();
     }
 
     public ByteArrayOutputStream encrypt(InputStream data, List<X509Certificate> certs, EncryptionKeyAlgorithm algorithm, boolean encodeToB64) throws Exception {
@@ -100,8 +102,13 @@ public class CmsService {
             throw new CryptographicException("Tsp address is empty");
 
         CAdESSignature cAdESSignature = new CAdESSignature(params.isDetached());
-        if (signatureType == CAdESType.CAdES_BES || signatureType == CAdESType.CAdES_T)
+        Set<X509CRL> crlSet;
+        if (signatureType == CAdESType.CAdES_BES || signatureType == CAdESType.CAdES_T) {
             cAdESSignature.setOptions(new Options().disableCertificateValidation());
+            crlSet = null;
+        } else {
+            crlSet = localCRLs;
+        }
         cAdESSignature.addSigner(
                 storeConfig.getKeyStore().getProvider().getName(),
                 digestOid,
@@ -113,7 +120,7 @@ public class CmsService {
                 false, // countersign
                 null, // signed attributes
                 null, // unsigned attributes
-                Collections.emptySet(), // set of crl
+                crlSet, // set of crl
                 true // add chain
         );
 
@@ -147,7 +154,7 @@ public class CmsService {
                 InputStream dataStream = request.getData()
         ) {
             CAdESSignature signature = new CAdESSignature(tryToGuess, dataStream, null);
-            signature.verify(null, null); // no exception ? everything is ok.
+            signature.verify(null, localCRLs); // no exception ? everything is ok.
             CAdESSigner[] signers = signature.getCAdESSignerInfos();
             for (int i = 0; i < signers.length; i++) {
                 CAdESSigner signer = signers[i];

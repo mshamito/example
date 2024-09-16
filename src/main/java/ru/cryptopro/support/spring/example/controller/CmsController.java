@@ -99,7 +99,7 @@ public class CmsController {
             @RequestParam MultipartFile data,
             @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean detached,
             @RequestParam(required = false) @Schema(defaultValue = "http://testca2012.cryptopro.ru/tsp/tsp.srf") String tsp,
-            @RequestParam(required = false) @Schema(defaultValue = "bes") String type,
+            @RequestParam(required = false) @Schema(defaultValue = "bes", description = "bes, t, xlt1, a") String type,
             @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean encodeToB64
     ) {
         if (data.isEmpty())

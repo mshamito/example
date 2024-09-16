@@ -1,11 +1,13 @@
 package ru.cryptopro.support.spring.example.config;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import ru.CryptoPro.JCP.KeyStore.StoreInputStream;
 
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -18,14 +20,17 @@ import java.util.List;
 @Log4j2
 @Getter
 @Configuration
+@ConfigurationProperties(prefix = "app.cp")
 public class StoreConfig {
     private KeyStore keyStore;
 
-    @Value("${app.cp.keystore}")
+    @Setter
+    @NotBlank
     private String keyStoreName;
-    @Value("${app.cp.alias}")
+    @Setter
+    @NotBlank
     private String alias;
-    @Value("${app.cp.pin}")
+    @Setter
     private String pin;
     private boolean isChainNeeded = false;
 
@@ -79,7 +84,7 @@ public class StoreConfig {
                 log.error("alias {} not found in {}", alias, keyStoreName);
                 throw new RuntimeException(String.format("configured alias %s not found", alias));
             }
-            log.info("configured alias found. try to load");
+            log.info("configured alias found. trying to load");
 
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
