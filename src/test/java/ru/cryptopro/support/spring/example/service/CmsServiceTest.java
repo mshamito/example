@@ -3,6 +3,7 @@ package ru.cryptopro.support.spring.example.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.CryptoPro.CAdES.EncryptionKeyAlgorithm;
 import ru.CryptoPro.JCP.JCP;
 import ru.cryptopro.support.spring.example.dto.SignatureParams;
 import ru.cryptopro.support.spring.example.dto.VerifyRequest;
@@ -29,11 +30,62 @@ class CmsServiceTest {
     CmsService cmsService;
 
     @Test
-    void encryptionSmall() {
+    void encryptionSmallDefault() {
         byte[] small = genFile(smallFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(small));
         assertDoesNotThrow(() -> {
-                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), false).toByteArray();
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), EncryptionKeyAlgorithm.ekaDefault, false).toByteArray();
+                    byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
+                    byte[] hash = gostHash(decrypted);
+                    assertArrayEquals(asyncDataHash.get(), hash);
+                }
+        );
+    }
+
+    @Test
+    void encryptionSmallMagma() {
+        byte[] small = genFile(smallFileSize);
+        CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(small));
+        assertDoesNotThrow(() -> {
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), EncryptionKeyAlgorithm.ekaMagma, false).toByteArray();
+                    byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
+                    byte[] hash = gostHash(decrypted);
+                    assertArrayEquals(asyncDataHash.get(), hash);
+                }
+        );
+    }
+    @Test
+    void encryptionSmallMagmaMac() {
+        byte[] small = genFile(smallFileSize);
+        CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(small));
+        assertDoesNotThrow(() -> {
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), EncryptionKeyAlgorithm.ekaMagmaMac, false).toByteArray();
+                    byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
+                    byte[] hash = gostHash(decrypted);
+                    assertArrayEquals(asyncDataHash.get(), hash);
+                }
+        );
+    }
+
+    @Test
+    void encryptionSmallKuznechik() {
+        byte[] small = genFile(smallFileSize);
+        CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(small));
+        assertDoesNotThrow(() -> {
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), EncryptionKeyAlgorithm.ekaKuznechik, false).toByteArray();
+                    byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
+                    byte[] hash = gostHash(decrypted);
+                    assertArrayEquals(asyncDataHash.get(), hash);
+                }
+        );
+    }
+
+    @Test
+    void encryptionSmallKuznechikMac() {
+        byte[] small = genFile(smallFileSize);
+        CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(small));
+        assertDoesNotThrow(() -> {
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(small), Collections.emptyList(), EncryptionKeyAlgorithm.ekaKuznechikMac, false).toByteArray();
                     byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
                     byte[] hash = gostHash(decrypted);
                     assertArrayEquals(asyncDataHash.get(), hash);
@@ -46,7 +98,7 @@ class CmsServiceTest {
         byte[] medium = genFile(mediumFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(medium));
         assertDoesNotThrow(() -> {
-                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(medium), Collections.emptyList(), false).toByteArray();
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(medium), Collections.emptyList(), null,false).toByteArray();
                     byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
                     byte[] hash = gostHash(decrypted);
                     assertArrayEquals(asyncDataHash.get(), hash);
@@ -59,7 +111,7 @@ class CmsServiceTest {
         byte[] big = genFile(bigFileSize);
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> gostHash(big));
         assertDoesNotThrow(() -> {
-                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(big), Collections.emptyList(), false).toByteArray();
+                    byte[] encoded = cmsService.encrypt(new ByteArrayInputStream(big), Collections.emptyList(), null, false).toByteArray();
                     byte[] decrypted = cmsService.decrypt(new ByteArrayInputStream(encoded)).toByteArray();
                     byte[] hash = gostHash(decrypted);
                     assertArrayEquals(asyncDataHash.get(), hash);

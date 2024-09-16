@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import ru.CryptoPro.CAdES.EncryptionKeyAlgorithm;
 import ru.CryptoPro.CAdES.exception.CAdESException;
 import ru.CryptoPro.CAdES.exception.EnvelopedException;
 import ru.CryptoPro.CAdES.exception.EnvelopedInvalidRecipientException;
@@ -42,9 +43,16 @@ public class CmsController {
 
     @PostMapping(value = "${app.controller.encrypt}")
     public ResponseEntity<StreamingResponseBody> encrypt(
-            @RequestParam(value = "data") MultipartFile data,
-            @RequestParam(required = false, value = "cert") List<MultipartFile> certs,
-            @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean encodeToB64
+            @RequestParam(value = "data")
+            MultipartFile data,
+            @RequestParam(required = false, value = "cert")
+            List<MultipartFile> certs,
+            @RequestParam(required = false, value = "alg")
+            @Schema(defaultValue = "ekaKuznechik", type = "EncryptionKeyAlgorithm", description = "ekaDefault, ekaMagma, ekaMagmaMac, ekaKuznechik, ekaKuznechikMac")
+            EncryptionKeyAlgorithm algorithm,
+            @RequestParam(required = false, defaultValue = "true")
+            @Schema(defaultValue = "true", type = "boolean")
+            boolean encodeToB64
     ) {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
@@ -57,7 +65,7 @@ public class CmsController {
 
         try (
                 InputStream inputStream = data.getInputStream();
-                ByteArrayOutputStream enveloped = cmsService.encrypt(inputStream, x509Certificates, encodeToB64)
+                ByteArrayOutputStream enveloped = cmsService.encrypt(inputStream, x509Certificates, algorithm, encodeToB64)
         ) {
             StreamingResponseBody response = enveloped::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);

@@ -45,8 +45,9 @@ public class CmsService {
         this.privateKey = privateKey;
     }
 
-    public ByteArrayOutputStream encrypt(InputStream data, List<X509Certificate> certs, boolean encodeToB64) throws Exception {
-        EnvelopedSignature envelopedSignature = new EnvelopedSignature(EncryptionKeyAlgorithm.ekaKuznechik);
+    public ByteArrayOutputStream encrypt(InputStream data, List<X509Certificate> certs, EncryptionKeyAlgorithm algorithm, boolean encodeToB64) throws Exception {
+        EncryptionKeyAlgorithm encryptionKeyAlgorithm = algorithm == null ? EncryptionKeyAlgorithm.ekaKuznechik : algorithm;
+        EnvelopedSignature envelopedSignature = new EnvelopedSignature(encryptionKeyAlgorithm);
         if (certs.isEmpty()) {
             // no certs provided. cert from alias will be used as recipient
             envelopedSignature.addKeyAgreeRecipient(certificate);
