@@ -58,7 +58,6 @@ public class StoreConfig {
 
             log.info("KeyStore loaded: {}", keyStoreName);
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
         return keyStore;
@@ -71,9 +70,10 @@ public class StoreConfig {
             List<String> aliases = Collections.list(fullKeyStore.aliases());
             if (aliases.isEmpty())
                 throw new RuntimeException("empty KeyStore");
-            log.info("available aliases:");
+            log.info("available aliases on {} :", keyStoreName);
             for (String walk : aliases)
-                log.info(walk);
+                log.info("{}) {}", aliases.indexOf(walk) + 1, walk);
+            log.info("aliases enumerated");
             log.info("checking configured alias");
             if (!aliases.contains(alias)) {
                 log.error("alias {} not found in {}", alias, keyStoreName);
