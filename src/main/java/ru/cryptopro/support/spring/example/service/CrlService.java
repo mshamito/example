@@ -38,9 +38,16 @@ public class CrlService {
     private Optional<X509CRL> generateCrl(String filename) {
         File file = new File(BASE_DIR, filename);
         try (InputStream stream = Files.newInputStream(file.toPath())) {
-            return Optional.of((X509CRL) factory.generateCRL(
+            log.info("reading crl: {}", filename);
+            X509CRL crl = (X509CRL) factory.generateCRL(
                     EncodingHelper.decodeDerOrB64Stream(stream)
-            ));
+            );
+            if (crl.getNextUpdate().compareTo(new Date()) >= 0) {
+                return Optional.of(crl);
+            } else {
+                log.warn("skipping expired crl: {}", filename);
+                return Optional.empty();
+            }
         } catch (CRLException | IOException e) {
             log.error(e);
             return Optional.empty();
@@ -57,7 +64,6 @@ public class CrlService {
         for (File walk : files) {
             Optional<X509CRL> crl = generateCrl(walk.getName());
             crl.ifPresent(result::add);
-            log.info("read crl: {}", walk.getName());
         }
         if (result.isEmpty())
             return null;
