@@ -62,13 +62,11 @@ public class CmsController {
         HttpHeaders headers = HeadersHelper.prepareHeaders(data.getOriginalFilename(), ".enc");
         MediaType mediaType = encodeToB64 ? MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
 
-        log.info("controller before");
         try (
                 InputStream inputStream = data.getInputStream()
         ) {
             FileStreamWrapper enveloped = cmsService.encrypt(inputStream, x509Certificates, algorithm, encodeToB64);
             StreamingResponseBody response = enveloped::writeToAndDelete;
-            log.info("controller after");
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
         } catch (Exception e) {
             throw new CryptographicException("Encrypt failed: " + e.getMessage());

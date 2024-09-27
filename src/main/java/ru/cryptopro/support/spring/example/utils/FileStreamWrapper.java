@@ -24,7 +24,6 @@ public class FileStreamWrapper{
     }
 
     public void writeToAndDelete(OutputStream outputStream) throws IOException {
-        log.error("writeTo started");
         InputStream inputStream = getInputStream();
         int read;
         byte[] buffer = new byte[BUFFER_SIZE];
