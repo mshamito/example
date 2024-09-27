@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 
 @Log4j2
 public class FileStreamWrapper {
@@ -21,23 +22,25 @@ public class FileStreamWrapper {
             byte[] buffer = new byte[BUFFER_SIZE];
             while ((read = inputStream.read(buffer)) != -1)
                 outputStream.write(buffer, 0, read);
-            deleteFile();
         }
     }
 
     public OutputStream getOutputStream() throws IOException {
+        validateFile();
+        log.info("temporary file was opened for writing: {}", file.getAbsolutePath());
         return Files.newOutputStream(file.toPath());
     }
 
     public InputStream getInputStream() throws IOException {
-        return Files.newInputStream(file.toPath());
+        validateFile();
+        log.info("temporary file was opened for reading, will be destroyed after reading: {}", file.getAbsolutePath());
+        return Files.newInputStream(file.toPath(), StandardOpenOption.DELETE_ON_CLOSE);
     }
 
-    private void deleteFile() {
-        String fullPath = file.getAbsoluteFile().toString();
-        if (file.delete())
-            log.info("temporary file deleted: {}", fullPath);
-        else
-            log.info("temporary file was not deleted: {}", fullPath);
+    private void validateFile() {
+        if (!file.exists())
+            log.error("temporary file not exists: {}", file.getAbsolutePath());
+        else if (!file.canWrite())
+            log.error("incorrect file permission: {}", file.getAbsolutePath());
     }
 }
