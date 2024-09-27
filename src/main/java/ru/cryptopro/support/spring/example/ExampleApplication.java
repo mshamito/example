@@ -25,7 +25,7 @@ public class ExampleApplication extends SpringBootServletInitializer {
         System.setProperty("java.util.prefs.syncInterval", "99999"); // https://support.cryptopro.ru/index.php?/Knowledgebase/Article/View/315/6/warning-couldnt-flush-system-prefs-javautilprefsbackingstoreexception--sreate-failed
 
         int javaMajorVersion = JavaVersionHelper.getVersion();
-        if (javaMajorVersion >= 10) {
+        if (javaMajorVersion >= 11) {
             boolean isJCSPExists = addProvider("ru.CryptoPro.JCSP.JCSP");
             if (isJCSPExists) {
                 if (!addProvider("ru.CryptoPro.sspiSSL.SSPISSL"))
@@ -45,7 +45,7 @@ public class ExampleApplication extends SpringBootServletInitializer {
             String shortName = GostProvidersNames.mapNames(fullName);
             if (!providers.contains(shortName)) {
                 Security.addProvider((Provider) Class.forName(fullName).getConstructor().newInstance());
-                System.out.println("Provider registered " + shortName);
+                System.out.println("Provider registered " + fullName);
             }
             return true;
         } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | RuntimeException e) {
