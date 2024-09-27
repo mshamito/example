@@ -43,7 +43,7 @@ public class ExampleApplication extends SpringBootServletInitializer {
         List<String> providers = Arrays.stream(Security.getProviders()).map(Provider::getName).collect(Collectors.toList());
         try {
             String shortName = GostProvidersNames.mapNames(fullName);
-            if (providers.contains(shortName)) {
+            if (!providers.contains(shortName)) {
                 Security.addProvider((Provider) Class.forName(fullName).getConstructor().newInstance());
                 System.out.println("Provider registered " + shortName);
             }
