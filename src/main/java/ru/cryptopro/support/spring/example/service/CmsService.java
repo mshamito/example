@@ -111,7 +111,7 @@ public class CmsService {
             crlSet = localCRLs;
         }
         cAdESSignature.addSigner(
-                storeConfig.getKeyStore().getProvider().getName(),
+                storeConfig.getProviderName(),
                 digestOid,
                 keyOid,
                 privateKey,

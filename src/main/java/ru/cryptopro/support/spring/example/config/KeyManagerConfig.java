@@ -38,8 +38,7 @@ public class KeyManagerConfig {
     @Bean("gostKeyManagers")
     @SneakyThrows
     public KeyManager[] getKeyManagers() {
-
-        KeyManagerFactory factory = KeyManagerFactory.getInstance("GostX509");
+        KeyManagerFactory factory = KeyManagerFactory.getInstance("GostX509", "JTLS");
         if (storeConfig.isChainNeeded()) {
             log.warn("Need certificate chain for your alias. using local certificates");
             KeyStore trustStore = KeyStore.getInstance(JCP.CERT_STORE_NAME);

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collections;
@@ -24,6 +25,9 @@ import java.util.List;
 public class StoreConfig {
     private KeyStore keyStore;
 
+    @Setter
+    @NotBlank
+    private String providerName;
     @Setter
     @NotBlank
     private String keyStoreName;
@@ -39,12 +43,12 @@ public class StoreConfig {
             return keyStore;
         try {
             validateStore();
-            keyStore = KeyStore.getInstance(keyStoreName);
+            keyStore = KeyStore.getInstance(keyStoreName, providerName);
             keyStore.load(new StoreInputStream(alias), null);
             Certificate[] chain = keyStore.getCertificateChain(alias);
 
             if (chain == null) {
-                KeyStore listKeyStore = KeyStore.getInstance(keyStoreName);
+                KeyStore listKeyStore = KeyStore.getInstance(keyStoreName, providerName);
                 listKeyStore.load(null, null);
                 List<String> aliases = Collections.list(listKeyStore.aliases());
                 if (aliases.isEmpty())
@@ -62,7 +66,8 @@ public class StoreConfig {
                 isChainNeeded = true;
 
             log.info("KeyStore loaded: {}", keyStoreName);
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
+                 NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
         return keyStore;
@@ -70,7 +75,7 @@ public class StoreConfig {
 
     private void validateStore() {
         try {
-            KeyStore fullKeyStore = KeyStore.getInstance(keyStoreName);
+            KeyStore fullKeyStore = KeyStore.getInstance(keyStoreName, providerName);
             fullKeyStore.load(null,null);
             List<String> aliases = Collections.list(fullKeyStore.aliases());
             if (aliases.isEmpty())
@@ -86,7 +91,8 @@ public class StoreConfig {
             }
             log.info("configured alias found. trying to load");
 
-        } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
+        } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException |
+                 NoSuchProviderException e) {
             throw new RuntimeException(e);
         }
 
