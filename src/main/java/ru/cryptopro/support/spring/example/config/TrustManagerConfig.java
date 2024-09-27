@@ -22,6 +22,7 @@ public class TrustManagerConfig {
 
     public TrustManagerConfig(
             @Qualifier("certsFromCACerts")
+//            @Qualifier("certsFromResources")
             Set<X509Certificate> certs
     ) {
         this.certs = certs;

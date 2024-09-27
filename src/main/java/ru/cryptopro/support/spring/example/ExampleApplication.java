@@ -4,11 +4,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import ru.cryptopro.support.spring.example.utils.GostProvidersNames;
 import ru.cryptopro.support.spring.example.utils.JavaVersionHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.security.Security;
 import java.security.Provider;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class ExampleApplication extends SpringBootServletInitializer {
@@ -36,10 +40,15 @@ public class ExampleApplication extends SpringBootServletInitializer {
     }
 
     private static boolean addProvider(String fullName) {
+        List<String> providers = Arrays.stream(Security.getProviders()).map(Provider::getName).collect(Collectors.toList());
         try {
-            Security.addProvider((Provider) Class.forName(fullName).getConstructor().newInstance());
+            String shortName = GostProvidersNames.mapNames(fullName);
+            if (providers.contains(shortName)) {
+                Security.addProvider((Provider) Class.forName(fullName).getConstructor().newInstance());
+                System.out.println("Provider registered " + shortName);
+            }
             return true;
-        } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (InstantiationException | ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | RuntimeException e) {
             System.out.println("Failed add provider: " + fullName);
             return false;
         }

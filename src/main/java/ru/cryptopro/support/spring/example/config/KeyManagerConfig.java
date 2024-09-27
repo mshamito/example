@@ -27,6 +27,7 @@ public class KeyManagerConfig {
     public KeyManagerConfig(
             StoreConfig storeConfig,
             @Qualifier("certsFromCACerts")
+//            @Qualifier("certsFromResources")
             Set<X509Certificate> certs
     ) {
         this.storeConfig = storeConfig;
@@ -43,6 +44,8 @@ public class KeyManagerConfig {
             log.warn("Need certificate chain for your alias. using local certificates");
             KeyStore trustStore = KeyStore.getInstance(JCP.CERT_STORE_NAME);
             trustStore.load(null,null);
+            if (certs.isEmpty())
+                throw new RuntimeException("trust certificates not provided");
             for (X509Certificate certificate : certs)
                 trustStore.setCertificateEntry(UUID.randomUUID().toString(), certificate);
             PKIXBuilderParameters parameters = new PKIXBuilderParameters(trustStore, new X509CertSelector());
