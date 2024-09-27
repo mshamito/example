@@ -7,12 +7,22 @@ import java.io.*;
 import java.nio.file.Files;
 
 @Log4j2
-public class FileStreamWrapper{
+public class FileStreamWrapper {
     private final File file;
     private final static int BUFFER_SIZE = 2 * 1024 * 1024;
 
     public FileStreamWrapper(@NotNull File file) {
         this.file = file;
+    }
+
+    public void writeTo(OutputStream outputStream) throws IOException {
+        try (InputStream inputStream = getInputStream()) {
+            int read;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((read = inputStream.read(buffer)) != -1)
+                outputStream.write(buffer, 0, read);
+            deleteFile();
+        }
     }
 
     public OutputStream getOutputStream() throws IOException {
@@ -23,16 +33,7 @@ public class FileStreamWrapper{
         return Files.newInputStream(file.toPath());
     }
 
-    public void writeToAndDelete(OutputStream outputStream) throws IOException {
-        InputStream inputStream = getInputStream();
-        int read;
-        byte[] buffer = new byte[BUFFER_SIZE];
-        while ((read = inputStream.read(buffer)) != -1)
-            outputStream.write(buffer, 0, read);
-        deleteFile();
-    }
-
-    public void deleteFile() {
+    private void deleteFile() {
         String fullPath = file.getAbsoluteFile().toString();
         if (file.delete())
             log.info("temporary file deleted: {}", fullPath);

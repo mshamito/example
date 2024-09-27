@@ -66,7 +66,7 @@ public class CmsController {
                 InputStream inputStream = data.getInputStream()
         ) {
             FileStreamWrapper enveloped = cmsService.encrypt(inputStream, x509Certificates, algorithm, encodeToB64);
-            StreamingResponseBody response = enveloped::writeToAndDelete;
+            StreamingResponseBody response = enveloped::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
         } catch (Exception e) {
             throw new CryptographicException("Encrypt failed: " + e.getMessage());
@@ -86,7 +86,7 @@ public class CmsController {
                 InputStream inputStream = encryptedCms.getInputStream()
         ) {
             FileStreamWrapper decrypted = cmsService.decrypt(inputStream);
-            StreamingResponseBody response = decrypted::writeToAndDelete;
+            StreamingResponseBody response = decrypted::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_OCTET_STREAM).body(response);
         } catch (EnvelopedException | EnvelopedInvalidRecipientException e) {
             throw new CryptographicException("Decrypt failed: " + e.getMessage());
@@ -120,7 +120,7 @@ public class CmsController {
                 InputStream inputStream = data.getInputStream()
         ) {
             FileStreamWrapper signature = cmsService.sign(inputStream, params);
-            StreamingResponseBody response = signature::writeToAndDelete;
+            StreamingResponseBody response = signature::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
         } catch (CAdESException | IOException e) {
             throw new CryptographicException("Sign failed: " + e.getMessage());

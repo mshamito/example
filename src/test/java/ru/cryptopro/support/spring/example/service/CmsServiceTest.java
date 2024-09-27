@@ -119,7 +119,6 @@ class CmsServiceTest {
                             new ByteArrayInputStream(data)
                     );
                     assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
-                    sign.deleteFile();
                 }
         );
     }
@@ -138,7 +137,6 @@ class CmsServiceTest {
                             new ByteArrayInputStream(data)
                     );
                     assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
-                    sign.deleteFile();
                 }
         );
     }
@@ -157,7 +155,6 @@ class CmsServiceTest {
                             new ByteArrayInputStream(data)
                     );
                     assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
-                    sign.deleteFile();
                 }
         );
     }
@@ -176,9 +173,6 @@ class CmsServiceTest {
     private byte[] encryptDecryptAndHash(byte[] data, EncryptionKeyAlgorithm algorithm) throws Exception {
         FileStreamWrapper encoded = cmsService.encrypt(new ByteArrayInputStream(data), Collections.emptyList(), algorithm, false);
         FileStreamWrapper decrypted = cmsService.decrypt(encoded.getInputStream());
-        byte[] hash = GOSTHash.computeHash(decrypted.getInputStream());
-        encoded.deleteFile();
-        decrypted.deleteFile();
-        return hash;
+        return GOSTHash.computeHash(decrypted.getInputStream());
     }
 }
