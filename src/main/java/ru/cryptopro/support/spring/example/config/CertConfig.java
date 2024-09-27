@@ -94,7 +94,7 @@ public class CertConfig {
             try {
                 X509Certificate certificate = (X509Certificate) factory.generateCertificate(EncodingHelper.decodeDerOrB64Stream(resource.getInputStream()));
                 result.add(certificate);
-                log.info("loaded ca certificate from resources, {}", certificate.getSubjectDN());
+                log.info("loaded ca certificate from resources, {}", certificate.getSubjectX500Principal());
             } catch (Exception e) {
                 log.error("failed to read file as certificate {}, exception: {}", resource.getFilename(), e.getMessage());
                 log.error(e);
