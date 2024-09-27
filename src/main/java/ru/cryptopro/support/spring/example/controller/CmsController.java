@@ -22,11 +22,10 @@ import ru.cryptopro.support.spring.example.exception.CryptographicException;
 import ru.cryptopro.support.spring.example.exception.ProvidedDataException;
 import ru.cryptopro.support.spring.example.service.CmsService;
 import ru.cryptopro.support.spring.example.utils.CastX509Helper;
+import ru.cryptopro.support.spring.example.utils.FileStreamWrapper;
 import ru.cryptopro.support.spring.example.utils.HeadersHelper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
@@ -63,11 +62,13 @@ public class CmsController {
         HttpHeaders headers = HeadersHelper.prepareHeaders(data.getOriginalFilename(), ".enc");
         MediaType mediaType = encodeToB64 ? MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
 
+        log.info("controller before");
         try (
-                InputStream inputStream = data.getInputStream();
-                ByteArrayOutputStream enveloped = cmsService.encrypt(inputStream, x509Certificates, algorithm, encodeToB64)
+                InputStream inputStream = data.getInputStream()
         ) {
-            StreamingResponseBody response = enveloped::writeTo;
+            FileStreamWrapper enveloped = cmsService.encrypt(inputStream, x509Certificates, algorithm, encodeToB64);
+            StreamingResponseBody response = enveloped::writeToAndDelete;
+            log.info("controller after");
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
         } catch (Exception e) {
             throw new CryptographicException("Encrypt failed: " + e.getMessage());
@@ -84,10 +85,10 @@ public class CmsController {
         HttpHeaders headers = HeadersHelper.prepareHeaders(encryptedCms.getOriginalFilename(), ".decrypted");
 
         try (
-                InputStream inputStream = encryptedCms.getInputStream();
-                ByteArrayOutputStream decrypted = cmsService.decrypt(inputStream)
+                InputStream inputStream = encryptedCms.getInputStream()
         ) {
-            StreamingResponseBody response = decrypted::writeTo;
+            FileStreamWrapper decrypted = cmsService.decrypt(inputStream);
+            StreamingResponseBody response = decrypted::writeToAndDelete;
             return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_OCTET_STREAM).body(response);
         } catch (EnvelopedException | EnvelopedInvalidRecipientException e) {
             throw new CryptographicException("Decrypt failed: " + e.getMessage());
@@ -118,10 +119,10 @@ public class CmsController {
         MediaType mediaType = encodeToB64 ? MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
 
         try (
-                InputStream inputStream = data.getInputStream();
-                ByteArrayOutputStream signature = cmsService.sign(inputStream, params)
+                InputStream inputStream = data.getInputStream()
         ) {
-            StreamingResponseBody response = signature::writeTo;
+            FileStreamWrapper signature = cmsService.sign(inputStream, params);
+            StreamingResponseBody response = signature::writeToAndDelete;
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
         } catch (CAdESException | IOException e) {
             throw new CryptographicException("Sign failed: " + e.getMessage());

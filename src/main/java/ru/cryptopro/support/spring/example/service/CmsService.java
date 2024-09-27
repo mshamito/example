@@ -16,9 +16,10 @@ import ru.cryptopro.support.spring.example.dto.VerifyResult;
 import ru.cryptopro.support.spring.example.exception.CryptographicException;
 import ru.cryptopro.support.spring.example.utils.CAdESTypeHelper;
 import ru.cryptopro.support.spring.example.utils.EncodingHelper;
+import ru.cryptopro.support.spring.example.utils.FileStreamWrapper;
 import ru.cryptopro.support.spring.example.utils.StreamUpdateHelper;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,7 +36,6 @@ public class CmsService {
     private final StoreConfig storeConfig;
     private final X509Certificate certificate;
     private final PrivateKey privateKey;
-    private final int BAOS_SIZE = 16 * 1024;
     private final Set<X509CRL> localCRLs;
 
     public CmsService(
@@ -50,7 +50,7 @@ public class CmsService {
         this.localCRLs = crlService.getLocalCRLs();
     }
 
-    public ByteArrayOutputStream encrypt(InputStream data, List<X509Certificate> certs, EncryptionKeyAlgorithm algorithm, boolean encodeToB64) throws Exception {
+    public FileStreamWrapper encrypt(InputStream data, List<X509Certificate> certs, EncryptionKeyAlgorithm algorithm, boolean encodeToB64) throws Exception {
         EncryptionKeyAlgorithm encryptionKeyAlgorithm = algorithm == null ? EncryptionKeyAlgorithm.ekaKuznechik : algorithm;
         EnvelopedSignature envelopedSignature = new EnvelopedSignature(encryptionKeyAlgorithm);
         if (certs.isEmpty()) {
@@ -61,20 +61,21 @@ public class CmsService {
                 envelopedSignature.addKeyAgreeRecipient(walk);
         }
 
+        File file = File.createTempFile("encrypt-",".enc");
+        FileStreamWrapper enveloped = new FileStreamWrapper(file);
         try (
-                InputStream inputStream = data;
-                ByteArrayOutputStream enveloped = new ByteArrayOutputStream(BAOS_SIZE)
+                InputStream inputStream = data
         ) {
             // DER output
             if (!encodeToB64) {
-                envelopedSignature.open(enveloped);
+                envelopedSignature.open(enveloped.getOutputStream());
                 StreamUpdateHelper.streamUpdateEnvelopedSignature(inputStream, envelopedSignature);
                 return enveloped;
             }
 
             // base64 output
             try (
-                    OutputStream wrapped = EncodingHelper.encodeStream(enveloped)
+                    OutputStream wrapped = EncodingHelper.encodeStream(enveloped.getOutputStream())
             ) {
                 envelopedSignature.open(wrapped);
                 StreamUpdateHelper.streamUpdateEnvelopedSignature(inputStream, envelopedSignature);
@@ -83,18 +84,21 @@ public class CmsService {
         }
     }
 
-    public ByteArrayOutputStream decrypt(InputStream encryptedCms) throws EnvelopedException, EnvelopedInvalidRecipientException, IOException {
+    public FileStreamWrapper decrypt(InputStream encryptedCms) throws EnvelopedException, EnvelopedInvalidRecipientException, IOException {
+        File file = File.createTempFile("decrypt-",".bin");
+        FileStreamWrapper streamWrapper = new FileStreamWrapper(file);
         try (
-                InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(encryptedCms);
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(BAOS_SIZE)
+                InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(encryptedCms)
         ) {
             EnvelopedSignature envelopedSignature = new EnvelopedSignature(tryToGuess);
-            envelopedSignature.decrypt(certificate, privateKey, byteArrayOutputStream);
-            return byteArrayOutputStream;
+            envelopedSignature.decrypt(certificate, privateKey, streamWrapper.getOutputStream());
+            return streamWrapper;
         }
     }
 
-    public ByteArrayOutputStream sign(InputStream data, SignatureParams params) throws CAdESException, IOException {
+    public FileStreamWrapper sign(InputStream data, SignatureParams params) throws CAdESException, IOException {
+        File file = File.createTempFile("sign-",".sig");
+        FileStreamWrapper signature = new FileStreamWrapper(file);
         String digestOid = AlgorithmUtility.keyAlgToDigestOid(privateKey.getAlgorithm());
         String keyOid = AlgorithmUtility.keyAlgToKeyAlgorithmOid(privateKey.getAlgorithm());
         int signatureType = CAdESTypeHelper.mapValue(params.getType());
@@ -127,19 +131,18 @@ public class CmsService {
 
         boolean encodeToB64 = params.isEncodeToB64();
         try (
-                InputStream inputStream = data;
-                ByteArrayOutputStream signature = new ByteArrayOutputStream(BAOS_SIZE)
+                InputStream inputStream = data
         ) {
             // DER output
             if (!encodeToB64) {
-                cAdESSignature.open(signature);
+                cAdESSignature.open(signature.getOutputStream());
                 StreamUpdateHelper.streamUpdateCAdESSignature(inputStream, cAdESSignature);
                 return signature;
             }
 
             // base64 output
             try (
-                    OutputStream wrapped = EncodingHelper.encodeStream(signature)
+                    OutputStream wrapped = EncodingHelper.encodeStream(signature.getOutputStream())
             ) {
                 cAdESSignature.open(wrapped);
                 StreamUpdateHelper.streamUpdateCAdESSignature(inputStream, cAdESSignature);
