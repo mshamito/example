@@ -9,7 +9,7 @@ public class SignatureParams {
     @Builder.Default
     private boolean detached = false;
     @Builder.Default
-    private boolean encodeToB64 = true;
+    private boolean encodeToB64 = false;
     @Builder.Default
     private String tsp = "";
     @Builder.Default

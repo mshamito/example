@@ -49,8 +49,8 @@ public class CmsController {
             @RequestParam(required = false, value = "alg")
             @Schema(defaultValue = "ekaKuznechik", type = "EncryptionKeyAlgorithm", description = "ekaDefault, ekaMagma, ekaMagmaMac, ekaKuznechik, ekaKuznechikMac")
             EncryptionKeyAlgorithm algorithm,
-            @RequestParam(required = false, defaultValue = "true")
-            @Schema(defaultValue = "true", type = "boolean")
+            @RequestParam(required = false, defaultValue = "false")
+            @Schema(defaultValue = "false", type = "boolean")
             boolean encodeToB64
     ) {
         if (data.isEmpty())
@@ -99,7 +99,7 @@ public class CmsController {
             @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean detached,
             @RequestParam(required = false) @Schema(defaultValue = "http://testca2012.cryptopro.ru/tsp/tsp.srf") String tsp,
             @RequestParam(required = false) @Schema(defaultValue = "bes", description = "bes, t, xlt1, a") String type,
-            @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean encodeToB64
+            @RequestParam(required = false, defaultValue = "false") @Schema(defaultValue = "false", type = "boolean") boolean encodeToB64
     ) {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");

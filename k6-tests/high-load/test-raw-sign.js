@@ -15,7 +15,7 @@ export default () => {
 
   const fd = new FormData()
   fd.append('data', { data: DATA, filename: 'data.bin', content_type: 'application/octet-stream' })
-  fd.append('encodeB64', false)
+  fd.append('encodeToB64', false)
   fd.append('invert', false)
 
   const headers = {'Content-Type': 'multipart/form-data; boundary=' + fd.boundary}
