@@ -23,7 +23,6 @@ public class CertService {
         this.certificateSet = certificateSet;
     }
 
-
     public CertVerifyResult validateCertificate(MultipartFile cert) {
         return validateCertificate(CastX509Helper.castCertificate(cert));
     }
