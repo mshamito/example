@@ -3,6 +3,7 @@ package ru.cryptopro.support.spring.example.controller;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.cryptopro.support.spring.example.dto.CertVerifyResult;
 import ru.cryptopro.support.spring.example.service.CertService;
 
 @SuppressWarnings("unused")
@@ -17,7 +18,7 @@ public class CertController {
     }
 
     @PostMapping("${app.controller.cert}")
-    public boolean validateCert(
+    public CertVerifyResult validateCert(
             @RequestParam(value = "cert") MultipartFile cert
     ) {
         return certService.validateCertificate(cert);

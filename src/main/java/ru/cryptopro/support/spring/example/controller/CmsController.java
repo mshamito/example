@@ -25,7 +25,8 @@ import ru.cryptopro.support.spring.example.utils.CastX509Helper;
 import ru.cryptopro.support.spring.example.utils.FileStreamWrapper;
 import ru.cryptopro.support.spring.example.utils.HeadersHelper;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
@@ -99,7 +100,8 @@ public class CmsController {
             @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean detached,
             @RequestParam(required = false) @Schema(defaultValue = "http://testca2012.cryptopro.ru/tsp/tsp.srf") String tsp,
             @RequestParam(required = false) @Schema(defaultValue = "bes", description = "bes, t, xlt1, a") String type,
-            @RequestParam(required = false, defaultValue = "false") @Schema(defaultValue = "false", type = "boolean") boolean encodeToB64
+            @RequestParam(required = false, defaultValue = "false") @Schema(defaultValue = "false", type = "boolean") boolean encodeToB64,
+            @RequestParam(required = false, defaultValue = "true") @Schema(defaultValue = "true", type = "boolean") boolean addChain
     ) {
         if (data.isEmpty())
             throw new ProvidedDataException("Provided data is empty");
@@ -107,6 +109,7 @@ public class CmsController {
         SignatureParams.SignatureParamsBuilder builder = SignatureParams.builder();
         builder.detached(detached);
         builder.encodeToB64(encodeToB64);
+        builder.addChain(addChain);
         if (Strings.isNotBlank(tsp))
             builder.tsp(tsp);
         if (Strings.isNotBlank(type))

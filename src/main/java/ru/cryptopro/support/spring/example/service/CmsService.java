@@ -10,6 +10,7 @@ import ru.CryptoPro.CAdES.exception.EnvelopedException;
 import ru.CryptoPro.CAdES.exception.EnvelopedInvalidRecipientException;
 import ru.CryptoPro.JCP.tools.AlgorithmUtility;
 import ru.cryptopro.support.spring.example.config.StoreConfig;
+import ru.cryptopro.support.spring.example.dto.CertDto;
 import ru.cryptopro.support.spring.example.dto.SignatureParams;
 import ru.cryptopro.support.spring.example.dto.VerifyRequest;
 import ru.cryptopro.support.spring.example.dto.VerifyResult;
@@ -61,7 +62,7 @@ public class CmsService {
                 envelopedSignature.addKeyAgreeRecipient(walk);
         }
 
-        File file = File.createTempFile("encrypt-",".enc");
+        File file = File.createTempFile("encrypt-", ".enc");
         FileStreamWrapper enveloped = new FileStreamWrapper(file);
         try (
                 InputStream inputStream = data
@@ -85,7 +86,7 @@ public class CmsService {
     }
 
     public FileStreamWrapper decrypt(InputStream encryptedCms) throws EnvelopedException, EnvelopedInvalidRecipientException, IOException {
-        File file = File.createTempFile("decrypt-",".bin");
+        File file = File.createTempFile("decrypt-", ".bin");
         FileStreamWrapper streamWrapper = new FileStreamWrapper(file);
         try (
                 InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(encryptedCms)
@@ -97,7 +98,7 @@ public class CmsService {
     }
 
     public FileStreamWrapper sign(InputStream data, SignatureParams params) throws CAdESException, IOException {
-        File file = File.createTempFile("sign-",".sig");
+        File file = File.createTempFile("sign-", ".sig");
         FileStreamWrapper signature = new FileStreamWrapper(file);
         String digestOid = AlgorithmUtility.keyAlgToDigestOid(privateKey.getAlgorithm());
         String keyOid = AlgorithmUtility.keyAlgToKeyAlgorithmOid(privateKey.getAlgorithm());
@@ -114,6 +115,7 @@ public class CmsService {
         } else {
             crlSet = localCRLs;
         }
+        boolean addCertChainToSign = params.isAddChain();
         cAdESSignature.addSigner(
                 storeConfig.getProviderName(),
                 digestOid,
@@ -126,7 +128,7 @@ public class CmsService {
                 null, // signed attributes
                 null, // unsigned attributes
                 crlSet, // set of crl
-                true // add chain
+                addCertChainToSign // add chain
         );
 
         boolean encodeToB64 = params.isEncodeToB64();
@@ -168,11 +170,7 @@ public class CmsService {
                         signer.getSignatureType()
                 ));
                 X509Certificate cert = signer.getSignerCertificate();
-                result.setSubjectDN(cert.getSubjectX500Principal());
-                result.setIssuerDN(cert.getIssuerX500Principal());
-                result.setNotBefore(cert.getNotBefore());
-                result.setNotAfter(cert.getNotAfter());
-
+                result.setCert(new CertDto(cert));
                 results.add(result);
             }
         }

@@ -11,6 +11,8 @@ public class SignatureParams {
     @Builder.Default
     private boolean encodeToB64 = false;
     @Builder.Default
+    private boolean addChain = true;
+    @Builder.Default
     private String tsp = "";
     @Builder.Default
     private String type = "bes";

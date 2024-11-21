@@ -22,6 +22,9 @@ app:
 server:
   port: 8080
 spring:
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
   servlet:
     multipart:
       max-file-size: -1

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.cryptopro.support.spring.example.dto.ClientTlsDto;
+import ru.cryptopro.support.spring.example.dto.TlsConnectionResult;
 import ru.cryptopro.support.spring.example.service.ClientTlsService;
 
 @SuppressWarnings("unused")
@@ -19,13 +20,15 @@ public class TlsController {
     }
 
     @PostMapping("${app.controller.tls}")
-    public String tls(
+    public TlsConnectionResult tls(
             @RequestParam boolean mTLS,
             @RequestParam @Schema(defaultValue = "https://cryptopro.ru") String url
     ) {
-        return tlsService.connect(ClientTlsDto.builder()
-                .url(url)
-                .mTLS(mTLS)
-                .build());
+        return tlsService.connect(
+                ClientTlsDto.builder()
+                        .url(url)
+                        .mTLS(mTLS)
+                        .build()
+        );
     }
 }
