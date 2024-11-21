@@ -10,7 +10,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 
 public class StreamUpdateHelper {
-    private final static int BUFFER_SIZE = 16 * 1024 * 1024;
+    private final static int BUFFER_SIZE = 2 * 1024 * 1024;
 
     public static void streamUpdateCAdESSignature(InputStream inputStream, CAdESSignature signature) throws CAdESException, IOException {
         int read;
