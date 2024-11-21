@@ -1,5 +1,6 @@
 package ru.cryptopro.support.spring.example.exception.handler;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,7 +13,10 @@ import java.util.Map;
 @ControllerAdvice
 public class CryptographicExceptionHandler {
     @ExceptionHandler(CryptographicException.class)
-    public ResponseEntity<Map<String,Object>> exception(CryptographicException exception) {
-        return ResponseEntity.internalServerError().body(ErrorMessageHelper.getMessageBody(exception));
+    public ResponseEntity<Map<String, Object>> exception(CryptographicException exception) {
+        return ResponseEntity
+                .internalServerError()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ErrorMessageHelper.getMessageBody(exception));
     }
 }
