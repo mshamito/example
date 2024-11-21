@@ -46,7 +46,6 @@ test {
             }
         }
     }
-    jvmArgs("-XX:+EnableDynamicAgentLoading")
     reports {
         junitXml.required = false
     }
