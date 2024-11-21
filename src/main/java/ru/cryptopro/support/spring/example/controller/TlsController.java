@@ -21,7 +21,7 @@ public class TlsController {
 
     @PostMapping("${app.controller.tls}")
     public TlsConnectionResult tls(
-            @RequestParam boolean mTLS,
+            @RequestParam(required = false, defaultValue = "false") @Schema(defaultValue = "false", type = "boolean") boolean mTLS,
             @RequestParam @Schema(defaultValue = "https://cryptopro.ru") String url
     ) {
         return tlsService.connect(

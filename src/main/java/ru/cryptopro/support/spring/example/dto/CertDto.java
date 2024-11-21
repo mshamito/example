@@ -81,20 +81,18 @@ public class CertDto {
             Collection<List<?>> altNames = cert.getSubjectAlternativeNames();
             if (altNames == null)
                 return null;
-            for (List<?> altName : altNames) {
-                if (altName.size() < 2) continue;
+            altNames.forEach(altName -> {
+                if (altName.size() < 2) return;
+                Integer contextSpecificTag = (Integer) altName.get(0);
                 // https://docs.oracle.com/javase/8/docs/api/java/security/cert/X509Certificate.html
-                switch ((Integer) altName.get(0)) {
-                    case 2, 7 -> { // 2 - DnsName, 7 - IPAddress
-                        Object data = altName.get(1);
-                        if (data instanceof String) {
-                            hostNameList.add(((String) data));
-                        }
-                    }
-                    default -> {
+                List<Integer> dnsNameOrIPAddress = Arrays.asList(2, 7);
+                if (dnsNameOrIPAddress.contains(contextSpecificTag)) {
+                    Object data = altName.get(1);
+                    if (data instanceof String) {
+                        hostNameList.add(((String) data));
                     }
                 }
-            }
+            });
         } catch (CertificateParsingException e) {
             throw new CryptographicException("Can't parse hostNames from this cert.");
         }
