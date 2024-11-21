@@ -97,5 +97,13 @@ curl http://localhost:8080/cert -F cert=@CERT
 где  
 CERT - сертификат для проверки
 
+## гост tls
+```shell
+curl localhost:8080/tls -F url="https://cryptopro.ru" [ -F mTLS=false]
+```
+где  
+url - адрес для подключения  
+mTLS - 2х сторонний тлс
+
 # Доступен Swagger
-```http://localhost:8080/swagger-ui/index.html```
+```http://localhost:8080```
