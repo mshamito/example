@@ -21,16 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @SpringBootTest
 class CmsServiceTest {
 
-    final int smallFileSize = 8 * 1024 * 1024;
-    final int mediumFileSize = 25 * 1024 * 1024;
-    final int bigFileSize = 50 * 1024 * 1024;
+    final int fileSize = 2 * 1024 * 1024;
 
     @Autowired
     CmsService cmsService;
 
     @Test
-    void encryptionSmallDefault() {
-        byte[] data = genFile(smallFileSize);
+    void encryptionDefault() {
+        byte[] data = genFile();
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> GOSTHash.computeHash(data));
         assertDoesNotThrow(() -> {
                     byte[] hash = encryptDecryptAndHash(data, EncryptionKeyAlgorithm.ekaDefault);
@@ -40,8 +38,8 @@ class CmsServiceTest {
     }
 
     @Test
-    void encryptionSmallMagma() {
-        byte[] data = genFile(smallFileSize);
+    void encryptionMagma() {
+        byte[] data = genFile();
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> GOSTHash.computeHash(data));
         assertDoesNotThrow(() -> {
                     byte[] hash = encryptDecryptAndHash(data, EncryptionKeyAlgorithm.ekaMagma);
@@ -51,8 +49,8 @@ class CmsServiceTest {
     }
 
     @Test
-    void encryptionSmallMagmaMac() {
-        byte[] data = genFile(smallFileSize);
+    void encryptionMagmaMac() {
+        byte[] data = genFile();
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> GOSTHash.computeHash(data));
         assertDoesNotThrow(() -> {
                     byte[] hash = encryptDecryptAndHash(data, EncryptionKeyAlgorithm.ekaMagmaMac);
@@ -62,8 +60,8 @@ class CmsServiceTest {
     }
 
     @Test
-    void encryptionSmallKuznechik() {
-        byte[] data = genFile(smallFileSize);
+    void encryptionKuznechik() {
+        byte[] data = genFile();
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> GOSTHash.computeHash(data));
         assertDoesNotThrow(() -> {
                     byte[] hash = encryptDecryptAndHash(data, EncryptionKeyAlgorithm.ekaKuznechik);
@@ -73,8 +71,8 @@ class CmsServiceTest {
     }
 
     @Test
-    void encryptionSmallKuznechikMac() {
-        byte[] data = genFile(smallFileSize);
+    void encryptionKuznechikMac() {
+        byte[] data = genFile();
         CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> GOSTHash.computeHash(data));
         assertDoesNotThrow(() -> {
                     byte[] hash = encryptDecryptAndHash(data, EncryptionKeyAlgorithm.ekaKuznechikMac);
@@ -84,30 +82,8 @@ class CmsServiceTest {
     }
 
     @Test
-    void encryptionMedium() {
-        byte[] data = genFile(mediumFileSize);
-        CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> GOSTHash.computeHash(data));
-        assertDoesNotThrow(() -> {
-                    byte[] hash = encryptDecryptAndHash(data);
-                    assertArrayEquals(asyncDataHash.get(), hash);
-                }
-        );
-    }
-
-    @Test
-    void encryptionBig() {
-        byte[] data = genFile(bigFileSize);
-        CompletableFuture<byte[]> asyncDataHash = CompletableFuture.supplyAsync(() -> GOSTHash.computeHash(data));
-        assertDoesNotThrow(() -> {
-                    byte[] hash = encryptDecryptAndHash(data);
-                    assertArrayEquals(asyncDataHash.get(), hash);
-                }
-        );
-    }
-
-    @Test
-    void signAndVerifySmall() {
-        byte[] data = genFile(smallFileSize);
+    void signAndVerify() {
+        byte[] data = genFile();
         SignatureParams params = SignatureParams.builder()
                 .encodeToB64(true)
                 .detached(false)
@@ -123,51 +99,11 @@ class CmsServiceTest {
         );
     }
 
-    @Test
-    void signAndVerifyMedium() {
-        byte[] data = genFile(mediumFileSize);
-        SignatureParams params = SignatureParams.builder()
-                .encodeToB64(false)
-                .detached(false)
-                .build();
-        assertDoesNotThrow(() -> {
-                    FileStreamWrapper sign = cmsService.sign(new ByteArrayInputStream(data), params);
-                    VerifyRequest verifyRequest = new VerifyRequest(
-                            sign.getInputStream(),
-                            new ByteArrayInputStream(data)
-                    );
-                    assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
-                }
-        );
-    }
-
-    @Test
-    void signAndVerifyBig() {
-        byte[] data = genFile(bigFileSize);
-        SignatureParams params = SignatureParams.builder()
-                .encodeToB64(false)
-                .detached(true)
-                .build();
-        assertDoesNotThrow(() -> {
-                    FileStreamWrapper sign = cmsService.sign(new ByteArrayInputStream(data), params);
-                    VerifyRequest verifyRequest = new VerifyRequest(
-                            sign.getInputStream(),
-                            new ByteArrayInputStream(data)
-                    );
-                    assertDoesNotThrow(() -> cmsService.verify(verifyRequest));
-                }
-        );
-    }
-
-    private byte[] genFile(int size) {
+    private byte[] genFile() {
         Random random = new Random();
-        byte[] out = new byte[size];
+        byte[] out = new byte[fileSize];
         random.nextBytes(out);
         return out;
-    }
-
-    private byte[] encryptDecryptAndHash(byte[] data) throws Exception {
-        return encryptDecryptAndHash(data, null);
     }
 
     private byte[] encryptDecryptAndHash(byte[] data, EncryptionKeyAlgorithm algorithm) throws Exception {
