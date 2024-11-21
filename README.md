@@ -19,12 +19,18 @@
 
 # Сборка
 ```shell
-./gradlew bootJar
+./gradlew clean test bootJar
 ```
+# Сборка под более старую java, если установлена более новая
+```shell
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 ./gradlew clean test bootjar
+```
+
 
 # Запуск
 ```shell
-./gradlew bootRun
+/path/to/jre/java -jar build/libs/example.jar
+
 ```
 
 # Использование
@@ -83,6 +89,13 @@ CERT - сертификат для проверки
 signBinary - бинарная подпись в файле  
 signBase64 - подпись в base64 строке  
 invert - перевернуть ли значение подписи (invert Endianness)
+
+## построение сертификата и проверка на отзыв
+```shell
+curl http://localhost:8080/cert -F cert=@CERT
+```
+где  
+CERT - сертификат для проверки
 
 # Доступен Swagger
 ```http://localhost:8080/swagger-ui/index.html```
