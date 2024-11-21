@@ -73,6 +73,7 @@ public class ClientTlsService {
         TlsConnectionResult result = new TlsConnectionResult();
         try (Response response = client.newCall(request).execute()) {
             result.setHttp(response.protocol().name());
+            result.setCode(response.code());
             result.setStatus(response.code() + " " + response.message());
             result.setHeaders(response.headers().toMultimap());
             Handshake handshake = response.handshake();

@@ -11,6 +11,7 @@ import java.util.Map;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TlsConnectionResult {
+    private int code;
     private String status;
     private Map<String, List<String>> headers;
     private String cipher;
