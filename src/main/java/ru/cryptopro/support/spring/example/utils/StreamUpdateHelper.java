@@ -19,7 +19,6 @@ public class StreamUpdateHelper {
             signature.update(buffer, 0, read);
         }
         inputStream.close();
-        signature.close();
     }
 
     public static void streamUpdateEnvelopedSignature(InputStream inputStream, EnvelopedSignature signature) throws Exception {
@@ -29,7 +28,6 @@ public class StreamUpdateHelper {
             signature.update(buffer, 0, read);
         }
         inputStream.close();
-        signature.close();
     }
 
     public static void streamUpdateRawSignature(InputStream inputStream, Signature signature) throws IOException, SignatureException {

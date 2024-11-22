@@ -71,6 +71,7 @@ public class CmsService {
             if (!encodeToB64) {
                 envelopedSignature.open(enveloped.getOutputStream());
                 StreamUpdateHelper.streamUpdateEnvelopedSignature(inputStream, envelopedSignature);
+                envelopedSignature.close();
                 return enveloped;
             }
 
@@ -80,6 +81,7 @@ public class CmsService {
             ) {
                 envelopedSignature.open(wrapped);
                 StreamUpdateHelper.streamUpdateEnvelopedSignature(inputStream, envelopedSignature);
+                envelopedSignature.close();
                 return enveloped;
             }
         }
@@ -89,10 +91,11 @@ public class CmsService {
         File file = File.createTempFile("decrypt-", ".bin");
         FileStreamWrapper streamWrapper = new FileStreamWrapper(file);
         try (
-                InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(encryptedCms)
+                InputStream tryToGuess = EncodingHelper.decodeDerOrB64Stream(encryptedCms);
+                OutputStream outputStream = streamWrapper.getOutputStream()
         ) {
             EnvelopedSignature envelopedSignature = new EnvelopedSignature(tryToGuess);
-            envelopedSignature.decrypt(certificate, privateKey, streamWrapper.getOutputStream());
+            envelopedSignature.decrypt(certificate, privateKey, outputStream);
             return streamWrapper;
         }
     }
@@ -139,6 +142,7 @@ public class CmsService {
             if (!encodeToB64) {
                 cAdESSignature.open(signature.getOutputStream());
                 StreamUpdateHelper.streamUpdateCAdESSignature(inputStream, cAdESSignature);
+                cAdESSignature.close();
                 return signature;
             }
 
@@ -148,6 +152,7 @@ public class CmsService {
             ) {
                 cAdESSignature.open(wrapped);
                 StreamUpdateHelper.streamUpdateCAdESSignature(inputStream, cAdESSignature);
+                cAdESSignature.close();
                 return signature;
             }
         }
