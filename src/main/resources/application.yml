@@ -5,6 +5,7 @@ app:
     keystorename: HDIMAGE
 
 #    for JCP
+#    providername: JCP
 #    keystorename: HDImageStore
 
     alias: test2012
