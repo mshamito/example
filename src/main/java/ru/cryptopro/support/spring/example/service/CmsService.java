@@ -1,6 +1,8 @@
 package ru.cryptopro.support.spring.example.service;
 
 import org.apache.logging.log4j.util.Strings;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.util.CollectionStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.CryptoPro.AdES.Options;
@@ -25,12 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class CmsService {
@@ -100,7 +100,7 @@ public class CmsService {
         }
     }
 
-    public FileStreamWrapper sign(InputStream data, SignatureParams params) throws CAdESException, IOException {
+    public FileStreamWrapper sign(InputStream data, SignatureParams params) throws CAdESException, IOException, CertificateEncodingException {
         File file = File.createTempFile("sign-", ".sig");
         FileStreamWrapper signature = new FileStreamWrapper(file);
         String digestOid = AlgorithmUtility.keyAlgToDigestOid(privateKey.getAlgorithm());
@@ -133,6 +133,13 @@ public class CmsService {
                 crlSet, // set of crl
                 addCertChainToSign // add chain
         );
+
+        if (!addCertChainToSign) { // add only one certificate
+            Collection<X509CertificateHolder> certificateHolders = new ArrayList<>();
+            certificateHolders.add(new X509CertificateHolder(certificate.getEncoded()));
+            CollectionStore<X509CertificateHolder> store = new CollectionStore<>(certificateHolders);
+            cAdESSignature.setCertificateStore(store);
+        }
 
         boolean encodeToB64 = params.isEncodeToB64();
         try (

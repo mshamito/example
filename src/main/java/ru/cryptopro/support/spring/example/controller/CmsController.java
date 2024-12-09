@@ -27,6 +27,7 @@ import ru.cryptopro.support.spring.example.utils.HeadersHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
@@ -125,7 +126,7 @@ public class CmsController {
             FileStreamWrapper signature = cmsService.sign(inputStream, params);
             StreamingResponseBody response = signature::writeTo;
             return ResponseEntity.ok().headers(headers).contentType(mediaType).body(response);
-        } catch (CAdESException | IOException e) {
+        } catch (CAdESException | IOException | CertificateEncodingException e) {
             throw new CryptographicException("Sign failed: " + e.getMessage());
         }
     }
